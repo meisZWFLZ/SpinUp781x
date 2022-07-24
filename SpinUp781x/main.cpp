@@ -11,12 +11,19 @@
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
 // Controller1          controller
-// discLoader           motor         1
-// PTOGroup             motor_group   2, 3
+// DiscLoader           motor         1
+// PTOLeft              motor         2
+// PTORight             motor         3
+// PTOPiston            digital_out   A
+// LeftDriveA           motor         4
+// LeftDriveB           motor         5
+// RightDriveA          motor         6
+// RightDriveB          motor         7
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
 
+#include <atomic>
 #include <iostream>
 #include <thread>
 
@@ -55,22 +62,32 @@ enum Button {
   SHOOT,
   ROLLER,
   INTAKE,
-  UNSTUCK_INTAKE
+  UNSTUCK_INTAKE,
+  PTO_SWITCH
 };
 
 controller::button getControllerButton(Button button) {
   controller::button ControllerButtons[] = {
-      Controller1.ButtonA, Controller1.ButtonB,    Controller1.ButtonX,
-      Controller1.ButtonY, Controller1.ButtonDown, Controller1.ButtonR1,
-      Controller1.ButtonR2};
+      Controller1.ButtonA,  Controller1.ButtonB,    Controller1.ButtonX,
+      Controller1.ButtonY,  Controller1.ButtonDown, Controller1.ButtonR1,
+      Controller1.ButtonR2, Controller1.ButtonLeft};
   return ControllerButtons[button];
 }
+
+enum Axis { LEFT_DRIVE, RIGHT_DRIVE };
+
+controller::axis getControllerAxis(Axis axis) {
+  controller::axis ControllerAxises[] = {Controller1.Axis3, Controller1.Axis2};
+  return ControllerAxises[axis];
+}
+
+static motor_group PTOGroup;
 
 // const std::chrono::duration<long long, milli> LENGTH_OF_GAME = 12000ms;
 const int LENGTH_OF_GAME = 20000;
 // const std::chrono::duration<long long, milli> LENGTH_OF_ENGAME = 10000ms;
 const int LENGTH_OF_ENGAME = 10000;
-discLoader.setStopping(brake); 
+
 // const std::chrono::steady_clock::time_point TIME_OF_ENGAME =
 // chrono::steady_clock::now() + LENGTH_OF_GAME - LENGTH_OF_ENGAME;
 const int TIME_OF_ENGAME =
@@ -87,32 +104,59 @@ static bool shooting = false; // disables drivetrain whilst aiming/shooting
 static int shots = 0; // tap shoot button to add more discs after original press
 static bool cancelShooting = false;
 
-static bool PTOState = false; // false = drivetrain, true = intake
+static bool PTOState = false;     // false = drivetrain, true = intake
+static bool PTOSwitching = false; // Disable PTO motors and drivetrain
 
 static bool expanded = false;
 static bool saftey = false; // true -> disables saftey mechanisms
 
 bool buttonPressed(Button button) {
-  getControllerButton(button).pressing();
-  return false;
+  return getControllerButton(button).pressing();
+}
+
+int axisPosition(Axis axis) { return getControllerAxis(axis).position(); }
+
+motor_group getLeftDrive() {
+  return PTOState ? motor_group(LeftDriveA, LeftDriveB, PTOLeft)
+                  : motor_group(LeftDriveA, LeftDriveB);
+}
+
+motor_group getRightDrive() {
+  return PTOState ? motor_group(RightDriveA, RightDriveB, PTORight)
+                  : motor_group(RightDriveA, RightDriveB);
 }
 
 void PTOIntake() {
+  if (PTOState)
+    return;
+  Brain.Screen.print("intake");
+  PTOPiston.set(false);
   // freeze drivetrain and pto motors
   PTOState = true;
+  PTOSwitching = false;
+}
+
+void PTODrivetrain() {
+  if (!PTOState)
+    return;
+  Brain.Screen.print("drive");
+  PTOPiston.set(true);
+  // freeze drivetrain and pto motors
+  PTOState = false;
+  PTOSwitching = false;
 }
 
 void endgameExpansion() {
   // expansion stuff
 }
 
-void loadDisc() { discLoader.spinFor(fwd, 90, degrees); }
+void loadDisc() { DiscLoader.spinFor(fwd, 90, degrees); }
 
 Position getPosition() { return {}; }
 
-void turn(double newHeading) { wait(150, msec); }
+void turn(double newHeading) { wait(600, msec); }
 
-void aimTurret(int distance /*inches*/) { wait(150, msec); }
+void aimTurret(int distance /*inches*/) { wait(0, msec); }
 
 void expansionButtonSubscriber() {
   // prevents expansion untill endgame
@@ -122,7 +166,7 @@ void expansionButtonSubscriber() {
 
 void cancelShootingButtonSubscriber() { cancelShooting = true; }
 
-void safteySwitchSubscriber() { saftey ^= saftey; }
+void safteySwitchSubscriber() { saftey = !saftey; }
 void shoot() {
   // aiming
   Position pos = getPosition();
@@ -132,16 +176,17 @@ void shoot() {
     aimTurret(Position::distance(pos, GOAL_POS));
 
   // shooting
-  for (shots = (shots < 3 ? shots : 3); shots != 0 && !cancelShooting;
-       shots--) {
+  for (int i = 0; i < 3 && !cancelShooting && i < shots; i++) {
     loadDisc();
 
     // wait for delay to repeat
     this_thread::sleep_for(DISC_LOAD_DELAY);
   }
+  shots = 0;
   cancelShooting = false;
   shooting = false;
 }
+
 void shootButtonSubscriber() {
   Brain.Screen.print("pressed");
   shots = shots + 1;
@@ -153,21 +198,56 @@ void shootButtonSubscriber() {
   (thread(shoot));
 }
 
+void PTOSwitchSubscriber() {
+  PTOSwitching = true;
+  if (PTOState)
+    PTODrivetrain();
+  else
+    PTOIntake();
+}
+
 void intakeButtonSubscriber() {
   PTOIntake();
   PTOGroup.spin(fwd, 100, pct);
 }
+
 void intakeReleasedSubscriber() { PTOGroup.stop(); }
+
+void unstuckIntakeButtonSubscriber() {
+  PTOIntake();
+  PTOGroup.spin(reverse, 25, pct);
+}
+
+void leftDriveSubscriber() {
+  getLeftDrive().spin(fwd, ((axisPosition(LEFT_DRIVE) / 100) ^ 3) * 100, pct);
+}
+
+void rightDriveSubscriber() {
+  getRightDrive().spin(fwd, ((axisPosition(RIGHT_DRIVE) / 100) ^ 3) * 100, pct);
+}
+
+void unstuckIntakeReleasedSubscriber() { PTOGroup.stop(); }
 
 void subscribeButtonListener(Button button, void (*callback)()) {
   getControllerButton(button).pressed(callback);
 }
+
 void subscribeReleasedListener(Button button, void (*callback)()) {
   getControllerButton(button).released(callback);
 }
 
+void subscribeAxisListener(Axis axis, void (*callback)()) {
+  getControllerAxis(axis).changed(callback);
+}
+
+void controllerDisplay();
+
 int main() {
   vexcodeInit();
+
+  PTOGroup = motor_group(PTOLeft, PTORight);
+
+  PTOPiston.set(false);
 
   subscribeButtonListener(Button::SHOOT, &shootButtonSubscriber);
   subscribeButtonListener(Button::SAFTEY_SWITCH, &safteySwitchSubscriber);
@@ -175,5 +255,43 @@ int main() {
                           &cancelShootingButtonSubscriber);
   subscribeButtonListener(Button::EXPANSION, &expansionButtonSubscriber);
   subscribeButtonListener(Button::INTAKE, &intakeButtonSubscriber);
+  subscribeButtonListener(Button::UNSTUCK_INTAKE,
+                          &unstuckIntakeButtonSubscriber);
+  subscribeButtonListener(Button::PTO_SWITCH, &PTOSwitchSubscriber);
+
+  subscribeReleasedListener(Button::UNSTUCK_INTAKE,
+                            &unstuckIntakeReleasedSubscriber);
   subscribeReleasedListener(Button::INTAKE, &intakeReleasedSubscriber);
+
+  subscribeAxisListener(Axis::LEFT_DRIVE, &leftDriveSubscriber);
+  subscribeAxisListener(Axis::RIGHT_DRIVE, &rightDriveSubscriber);
+
+  controllerDisplay();
+}
+
+void controllerDisplay() {
+  {
+    while (1) {
+      // reset
+      Controller1.Screen.setCursor(0, 0);
+
+      // shots
+      Controller1.Screen.clearLine();
+      Controller1.Screen.print("shots: ");
+      Controller1.Screen.print(shots);
+      Controller1.Screen.newLine();
+
+      // PTO State
+      Controller1.Screen.clearLine();
+      Controller1.Screen.print(PTOState ? "intake" : "drive");
+      Controller1.Screen.newLine();
+
+      // Deez Nuts
+      Controller1.Screen.clearLine();
+      Controller1.Screen.print("deez nuts");
+      Controller1.Screen.newLine();
+
+      wait(50, msec);
+    }
+  }
 }
