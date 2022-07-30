@@ -1,3 +1,5 @@
+
+
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
@@ -10,15 +12,16 @@
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// DiscLoader           motor         1
-// PTOLeft              motor         2
-// PTORight             motor         3
-// PTOPiston            digital_out   A
-// LeftDriveA           motor         4
-// LeftDriveB           motor         5
-// RightDriveA          motor         6
-// RightDriveB          motor         7
+// Controller1          controller                    
+// DiscLoader           motor         1               
+// PTOLeft              motor         2               
+// PTORight             motor         3               
+// PTOPiston            digital_out   A               
+// LeftDriveA           motor         4               
+// LeftDriveB           motor         5               
+// RightDriveA          motor         6               
+// RightDriveB          motor         7               
+// FlyWheel             motor         8               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
@@ -26,6 +29,7 @@
 #include <atomic>
 #include <iostream>
 #include <thread>
+#include <cmath>
 
 using namespace vex;
 
@@ -117,13 +121,13 @@ bool buttonPressed(Button button) {
 int axisPosition(Axis axis) { return getControllerAxis(axis).position(); }
 
 motor_group getLeftDrive() {
-  return PTOState ? motor_group(LeftDriveA, LeftDriveB, PTOLeft)
-                  : motor_group(LeftDriveA, LeftDriveB);
+  return PTOState ? motor_group(LeftDriveA, LeftDriveB)
+                  : motor_group(LeftDriveA, LeftDriveB, PTOLeft);
 }
 
 motor_group getRightDrive() {
-  return PTOState ? motor_group(RightDriveA, RightDriveB, PTORight)
-                  : motor_group(RightDriveA, RightDriveB);
+  return PTOState ? motor_group(RightDriveA, RightDriveB)
+                  : motor_group(RightDriveA, RightDriveB, PTORight);
 }
 
 void PTOIntake() {
@@ -219,11 +223,11 @@ void unstuckIntakeButtonSubscriber() {
 }
 
 void leftDriveSubscriber() {
-  getLeftDrive().spin(fwd, ((axisPosition(LEFT_DRIVE) / 100) ^ 3) * 100, pct);
+  getLeftDrive().spin(fwd, pow((float)axisPosition(LEFT_DRIVE)/100, 3)*100, pct);
 }
 
 void rightDriveSubscriber() {
-  getRightDrive().spin(fwd, ((axisPosition(RIGHT_DRIVE) / 100) ^ 3) * 100, pct);
+  getRightDrive().spin(fwd, pow((float)axisPosition(RIGHT_DRIVE)/100, 3)*100, pct);
 }
 
 void unstuckIntakeReleasedSubscriber() { PTOGroup.stop(); }
