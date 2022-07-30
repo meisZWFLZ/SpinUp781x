@@ -12,24 +12,24 @@
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
-// Controller1          controller                    
-// DiscLoader           motor         1               
-// PTOLeft              motor         2               
-// PTORight             motor         3               
-// PTOPiston            digital_out   A               
-// LeftDriveA           motor         4               
-// LeftDriveB           motor         5               
-// RightDriveA          motor         6               
-// RightDriveB          motor         7               
-// FlyWheel             motor         8               
+// Controller1          controller
+// DiscLoader           motor         1
+// PTOLeft              motor         2
+// PTORight             motor         3
+// PTOPiston            digital_out   A
+// LeftDriveA           motor         4
+// LeftDriveB           motor         5
+// RightDriveA          motor         6
+// RightDriveB          motor         7
+// FlyWheel             motor         8
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
 
 #include <atomic>
+#include <cmath>
 #include <iostream>
 #include <thread>
-#include <cmath>
 
 using namespace vex;
 
@@ -45,11 +45,11 @@ NOlong ES:
 */
 
 class Position {
+public:
   double x; // inches
   double y; // inches
   double heading;
 
-public:
   Position(double x, double y, double heading)
       : x(x), y(y), heading(fmod(heading, 360)){};
   Position() : x(0), y(0), heading(0){};
@@ -67,14 +67,15 @@ enum Button {
   ROLLER,
   INTAKE,
   UNSTUCK_INTAKE,
-  PTO_SWITCH
+  PTO_SWITCH,
+  FLY_WHEEL_TOGGLE
 };
 
 controller::button getControllerButton(Button button) {
   controller::button ControllerButtons[] = {
       Controller1.ButtonA,  Controller1.ButtonB,    Controller1.ButtonX,
       Controller1.ButtonY,  Controller1.ButtonDown, Controller1.ButtonR1,
-      Controller1.ButtonR2, Controller1.ButtonLeft};
+      Controller1.ButtonR2, Controller1.ButtonLeft, Controller1.ButtonUp};
   return ControllerButtons[button];
 }
 
@@ -108,8 +109,13 @@ static bool shooting = false; // disables drivetrain whilst aiming/shooting
 static int shots = 0; // tap shoot button to add more discs after original press
 static bool cancelShooting = false;
 
+static atomic<bool> shootingYawed;   // wait until yawed to shoot
+static atomic<bool> shootingPitched; // wait until pitched to shoot
+
 static bool PTOState = false;     // false = drivetrain, true = intake
 static bool PTOSwitching = false; // Disable PTO motors and drivetrain
+
+static bool flyWheelSpin = true;
 
 static bool expanded = false;
 static bool saftey = false; // true -> disables saftey mechanisms
@@ -156,7 +162,7 @@ void endgameExpansion() {
 
 void loadDisc() { DiscLoader.spinFor(fwd, 90, degrees); }
 
-Position getPosition() { return {}; }
+Position getPosition() { return {}; } // gets robot position
 
 void turn(double newHeading) { wait(600, msec); }
 
@@ -175,7 +181,7 @@ void shoot() {
   // aiming
   Position pos = getPosition();
   if (!cancelShooting)
-    turn(0 /*too lazy*/);
+    turn(0);
   if (!cancelShooting)
     aimTurret(Position::distance(pos, GOAL_POS));
 
@@ -222,12 +228,25 @@ void unstuckIntakeButtonSubscriber() {
   PTOGroup.spin(reverse, 25, pct);
 }
 
+void flyWheelButtonSubscriber() {
+  flyWheelSpin = !flyWheelSpin;
+  if(flyWheelSpin) FlyWheel.spin(fwd);
+  else FlyWheel.stop();
+}
+
+// void leftDriveSubscriber() {
+//   getLeftDrive().spin(fwd, pow((float)axisPosition(LEFT_DRIVE) / 100, 3) * 100,
+//                       pct);
+// }
+
+//old
 void leftDriveSubscriber() {
-  getLeftDrive().spin(fwd, pow((float)axisPosition(LEFT_DRIVE)/100, 3)*100, pct);
+  getLeftDrive().spin(fwd, ((axisPosition(LEFT_DRIVE) / 100) ^ 3) * 100, pct);
 }
 
 void rightDriveSubscriber() {
-  getRightDrive().spin(fwd, pow((float)axisPosition(RIGHT_DRIVE)/100, 3)*100, pct);
+  getRightDrive().spin(
+      fwd, pow((float)axisPosition(RIGHT_DRIVE) / 100, 3) * 100, pct);
 }
 
 void unstuckIntakeReleasedSubscriber() { PTOGroup.stop(); }
@@ -246,12 +265,20 @@ void subscribeAxisListener(Axis axis, void (*callback)()) {
 
 void controllerDisplay();
 
+void motorSetup() {
+  PTOGroup = motor_group(PTOLeft, PTORight);
+
+  FlyWheel.setBrake(coast);
+  FlyWheel.setVelocity(100, pct);
+  FlyWheel.spin(fwd);
+
+  PTOPiston.set(false);
+}
+
 int main() {
   vexcodeInit();
 
-  PTOGroup = motor_group(PTOLeft, PTORight);
-
-  PTOPiston.set(false);
+  motorSetup();
 
   subscribeButtonListener(Button::SHOOT, &shootButtonSubscriber);
   subscribeButtonListener(Button::SAFTEY_SWITCH, &safteySwitchSubscriber);
@@ -262,6 +289,7 @@ int main() {
   subscribeButtonListener(Button::UNSTUCK_INTAKE,
                           &unstuckIntakeButtonSubscriber);
   subscribeButtonListener(Button::PTO_SWITCH, &PTOSwitchSubscriber);
+  subscribeButtonListener(Button::FLY_WHEEL_TOGGLE, &flyWheelButtonSubscriber);
 
   subscribeReleasedListener(Button::UNSTUCK_INTAKE,
                             &unstuckIntakeReleasedSubscriber);
