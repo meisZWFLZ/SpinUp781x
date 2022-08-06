@@ -17,6 +17,8 @@
 
 #include "robot-config.h"
 
+void autonSkills(void);
+
 #define waitUntil(condition)                                                   \
   do {                                                                         \
     wait(5, msec);                                                             \

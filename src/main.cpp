@@ -59,6 +59,8 @@ public:
   }
 };
 
+const Position GOAL_POS = {0, 0, 0};
+
 enum Button {
   CANCEL_SHOOTING,
   EXPANSION,
@@ -103,7 +105,6 @@ const int TIME_OF_ENGAME =
 const int DISC_LOAD_DELAY =
     500; // should be time piston takes to complete full cycle
 
-const Position GOAL_POS = {0, 0, 0};
 
 static bool shooting = false; // disables drivetrain whilst aiming/shooting
 static int shots = 0; // tap shoot button to add more discs after original press
@@ -277,6 +278,8 @@ void motorSetup() {
 
 int main() {
   vexcodeInit();
+
+  autonSkills();
 
   motorSetup();
 
