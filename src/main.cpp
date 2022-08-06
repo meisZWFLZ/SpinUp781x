@@ -25,7 +25,7 @@
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
-
+#include "auton/position.h"
 #include <atomic>
 #include <cmath>
 #include <iostream>
@@ -43,21 +43,6 @@ NOlong ES:
 - automatic shooting :(
 - distance in inches
 */
-
-class Position {
-public:
-  double x; // inches
-  double y; // inches
-  double heading;
-
-  Position(double x, double y, double heading)
-      : x(x), y(y), heading(fmod(heading, 360)){};
-  Position() : x(0), y(0), heading(0){};
-
-  static double distance(const Position &pos1, const Position &pos2) {
-    return sqrt(pow(pos1.x - pos2.x, 2) + pow(pos1.y - pos2.y, 2));
-  }
-};
 
 const Position GOAL_POS = {0, 0, 0};
 
@@ -278,8 +263,6 @@ void motorSetup() {
 
 int main() {
   vexcodeInit();
-
-  autonSkills();
 
   motorSetup();
 
