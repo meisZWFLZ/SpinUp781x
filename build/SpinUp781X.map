@@ -101,17 +101,35 @@ Discarded input sections
  .ARM.exidx.text._Z9aimTurreti
                 0x00000000        0x8 build/src/main.o
  .llvm_addrsig  0x00000000       0x22 build/src/main.o
- .text          0x00000000        0x0 build/src/brainButtons.o
- .comment       0x00000000       0x2e build/src/brainButtons.o
- .note.GNU-stack
-                0x00000000        0x0 build/src/brainButtons.o
- .ARM.attributes
-                0x00000000       0x38 build/src/brainButtons.o
- .llvm_addrsig  0x00000000        0x0 build/src/brainButtons.o
  .text          0x00000000        0x0 build/src/robot-config.o
  .data.RemoteControlCodeEnabled
                 0x00000000        0x1 build/src/robot-config.o
  .llvm_addrsig  0x00000000        0xd build/src/robot-config.o
+ .text          0x00000000        0x0 build/src/auton/autonPath.o
+ .text._ZN9AutonPathC2ESt6vectorI9AutonNodeSaIS1_EE
+                0x00000000       0x2c build/src/auton/autonPath.o
+ .ARM.exidx.text._ZN9AutonPathC2ESt6vectorI9AutonNodeSaIS1_EE
+                0x00000000        0x8 build/src/auton/autonPath.o
+ .group         0x00000000        0xc build/src/auton/autonPath.o
+ .text._ZNSt6vectorI9AutonNodeSaIS0_EEaSERKS2_
+                0x00000000      0x13c build/src/auton/autonPath.o
+ .ARM.exidx.text._ZNSt6vectorI9AutonNodeSaIS0_EEaSERKS2_
+                0x00000000        0x8 build/src/auton/autonPath.o
+ .text._ZN9AutonPath3runEv
+                0x00000000       0x48 build/src/auton/autonPath.o
+ .ARM.exidx.text._ZN9AutonPath3runEv
+                0x00000000        0x8 build/src/auton/autonPath.o
+ .group         0x00000000        0xc build/src/auton/autonPath.o
+ .text._ZNSt12_Vector_baseI9AutonNodeSaIS0_EE11_M_allocateEj
+                0x00000000       0x30 build/src/auton/autonPath.o
+ .ARM.exidx.text._ZNSt12_Vector_baseI9AutonNodeSaIS0_EE11_M_allocateEj
+                0x00000000        0x8 build/src/auton/autonPath.o
+ .comment       0x00000000       0x2e build/src/auton/autonPath.o
+ .note.GNU-stack
+                0x00000000        0x0 build/src/auton/autonPath.o
+ .ARM.attributes
+                0x00000000       0x3a build/src/auton/autonPath.o
+ .llvm_addrsig  0x00000000        0x0 build/src/auton/autonPath.o
  .text          0x00000000        0x0 build/src/auton/autonNode.o
  .text._ZN9AutonNodeC2EP8Position6ACTION
                 0x00000000        0xc build/src/auton/autonNode.o
@@ -3745,8 +3763,8 @@ Linker script and memory map
                 0x03907820                _end = .
 LOAD C:\Program Files (x86)\VEX Robotics\VEXcode Pro V5\sdk/vexv5/stdlib_0.lib
 LOAD build/src/main.o
-LOAD build/src/brainButtons.o
 LOAD build/src/robot-config.o
+LOAD build/src/auton/autonPath.o
 LOAD build/src/auton/autonNode.o
 LOAD build/src/auton/position.o
 START GROUP

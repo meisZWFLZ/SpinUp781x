@@ -1,9 +1,11 @@
 #include "auton/autonNode.h"
+#include <vector>
+
 class AutonPath {
 private:
-  AutonNode nodes[];
+  std::vector<AutonNode> nodes;
 
 public:
-  AutonPath(AutonNode nodes[]);
+  AutonPath(std::vector<AutonNode> autonNodes);
   void run();
 };
