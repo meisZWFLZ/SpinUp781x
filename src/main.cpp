@@ -1,5 +1,3 @@
-
-
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
@@ -12,20 +10,20 @@
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// DiscLoader           motor         1
-// PTOLeft              motor         2
-// PTORight             motor         3
-// PTOPiston            digital_out   A
-// LeftDriveA           motor         4
-// LeftDriveB           motor         5
-// RightDriveA          motor         6
-// RightDriveB          motor         7
-// FlyWheel             motor         8
+// Controller1          controller                    
+// DiscLoader           motor         1               
+// PTOLeft              motor         2               
+// PTORight             motor         3               
+// PTOPiston            digital_out   A               
+// LeftDriveA           motor         4               
+// LeftDriveB           motor         5               
+// RightDriveA          motor         6               
+// RightDriveB          motor         7               
+// FlyWheel             motor         8               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
-#include "vex.h"
 #include "auton/position.h"
+#include "vex.h"
 #include <atomic>
 #include <cmath>
 #include <iostream>
@@ -73,7 +71,7 @@ controller::axis getControllerAxis(Axis axis) {
   return ControllerAxises[axis];
 }
 
-static motor_group PTOGroup;
+motor_group PTOGroup = motor_group(PTOLeft, PTORight);
 
 // const std::chrono::duration<long long, milli> LENGTH_OF_GAME = 12000ms;
 const int LENGTH_OF_GAME = 20000;
@@ -89,7 +87,6 @@ const int TIME_OF_ENGAME =
 // //should be time piston takes to complete full cycle
 const int DISC_LOAD_DELAY =
     500; // should be time piston takes to complete full cycle
-
 
 static bool shooting = false; // disables drivetrain whilst aiming/shooting
 static int shots = 0; // tap shoot button to add more discs after original press
@@ -203,7 +200,7 @@ void PTOSwitchSubscriber() {
 }
 
 void intakeButtonSubscriber() {
-  PTOIntake();
+  // PTOIntake();
   PTOGroup.spin(fwd, 100, pct);
 }
 
@@ -216,18 +213,15 @@ void unstuckIntakeButtonSubscriber() {
 
 void flyWheelButtonSubscriber() {
   flyWheelSpin = !flyWheelSpin;
-  if(flyWheelSpin) FlyWheel.spin(fwd);
-  else FlyWheel.stop();
+  if (flyWheelSpin)
+    FlyWheel.spin(fwd);
+  else
+    FlyWheel.stop();
 }
 
-// void leftDriveSubscriber() {
-//   getLeftDrive().spin(fwd, pow((float)axisPosition(LEFT_DRIVE) / 100, 3) * 100,
-//                       pct);
-// }
-
-//old
 void leftDriveSubscriber() {
-  getLeftDrive().spin(fwd, ((axisPosition(LEFT_DRIVE) / 100) ^ 3) * 100, pct);
+  getLeftDrive().spin(fwd, pow((float)axisPosition(LEFT_DRIVE) / 100, 3) * 100,
+                      pct);
 }
 
 void rightDriveSubscriber() {
@@ -252,8 +246,6 @@ void subscribeAxisListener(Axis axis, void (*callback)()) {
 void controllerDisplay();
 
 void motorSetup() {
-  PTOGroup = motor_group(PTOLeft, PTORight);
-
   FlyWheel.setBrake(coast);
   FlyWheel.setVelocity(100, pct);
   FlyWheel.spin(fwd);
@@ -306,7 +298,7 @@ void controllerDisplay() {
 
       // Deez Nuts
       Controller1.Screen.clearLine();
-      Controller1.Screen.print("deez nuts");
+      Controller1.Screen.print(/* "deez nuts" */ FlyWheel.temperature(pct));
       Controller1.Screen.newLine();
 
       wait(50, msec);

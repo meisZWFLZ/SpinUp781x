@@ -16,8 +16,10 @@ class AutonNode {
 private:
   ACTION act;
   Position *pos;
+  bool PTOPos;
 
+  void movePTO();
 public:
-  AutonNode(Position *position, ACTION action);
+  AutonNode(Position *position, bool PTOPosition, ACTION action);
   void execute();
 };
