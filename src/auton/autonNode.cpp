@@ -16,8 +16,12 @@ void (*actionArr[])() = {shootRed, shootBlue, shoot, intake,
 void performAction(ACTION act) { actionArr[act](); }
 } // namespace
 
-AutonNode::AutonNode(Position *position, ACTION action)
-    : pos(position), act(action){};
+void AutonNode::movePTO() {
+  
+}
+
+AutonNode::AutonNode(Position *position, bool PTOPosition, ACTION action)
+    : pos(position), PTOPos(PTOPosition), act(action){};
 
 void AutonNode::execute() {
   pos->goTo();
