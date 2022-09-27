@@ -1,11 +1,11 @@
-#include "auton/autonNode.h"
-#include <vector>
+// #include "auton/autonNode.h"
+// #include <vector>
 
-class AutonPath {
-private:
-  std::vector<AutonNode> nodes;
+// class AutonPath {
+// private:
+//   std::vector<AutonNode> nodes;
 
-public:
-  AutonPath(std::vector<AutonNode> autonNodes);
-  void run();
-};
+// public:
+//   AutonPath(std::vector<AutonNode> autonNodes);
+//   void run();
+// };

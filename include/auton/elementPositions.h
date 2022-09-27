@@ -1,20 +1,20 @@
-#include <auton/position.h>
+// #include "position.h"
 
-const Position DiscPosition[]{
-    {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
-    {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
-    {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
-};
+// const Position DiscPosition[]{
+//     {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+//     {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+//     {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+// };
 
-//add stuff for adjusting based on robot dimensions
-const Position RollerPosition[]{
-    {},
-    {},
-    {},
-    {},
-};
+// //add stuff for adjusting based on robot dimensions
+// const Position RollerPosition[]{
+//     {},
+//     {},
+//     {},
+//     {},
+// };
 
-const Position GoalPosition[]{
-    {}, //red
-    {}, //blue
-};
+// const Position GoalPosition[]{
+//     {}, //red
+//     {}, //blue
+// };

@@ -1,0 +1,46 @@
+
+#ifndef ODOM_TRACKING_H
+#define ODOM_TRACKING_H
+
+#include "odom/odomData.h"
+#include <thread>
+
+using namespace std;
+
+class OdomTracking {
+public:
+  std::vector<double> encoderInches;
+
+  OdomData data;
+  Position deltaPos1 = {};
+
+  void updateEncoderInches();
+  void updateSnapshot(const Position robotPos); // update snapshot
+
+  double findDeltaTheta();
+  double findDeltaX(const double thetaDelta);
+  double findDeltaY(const double thetaDelta);
+
+  Position findDeltaPosition();
+
+  // axis:
+  // true -> x
+  // false -> y
+  double findTravel(const bool axis, const Position &deltaPos);
+
+  double findTravelX(const double deltaX, const double deltaY, const double deltaHeading);
+  double findTravelY(const double deltaX, const double deltaY, const double deltaHeading);
+
+  Position findRobotPosition();
+
+public:
+  constexpr static const double WAIT_TIME = 20;
+
+  // static void
+  // trackingLoop(OdomTracking *); // all operations used to find robot position
+
+  OdomTracking(const Position startPos); // runs tracking loop
+  Position getRobotPosition();
+};
+
+#endif
