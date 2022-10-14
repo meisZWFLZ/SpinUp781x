@@ -345,14 +345,12 @@ int axisPosition(Axis axis) { return getControllerAxis(axis).position(); }
 // void subscribeAxisListener(Axis axis, void (*callback)()) {
 //   getControllerAxis(axis).changed(callback);
 // }
-atomic<bool> r1NewPress = {false};
-atomic<bool> l1NewPress = {false};
-atomic<bool> PTOWasSwitched = {false};
 static atomic<bool> PTOState = {true}; // false = drivetrain, true = intake
 
 enum PTO { DRIVE, INTAKE };
-enum ROLLER { RED, BLUE, IN_BETWEEN };
-// enum TEAM { RED, BLUE };
+enum class TEAM { RED, BLUE } TEAM;
+enum class ROLLER { RED, BLUE, IN_BETWEEN } ROLLER;
+
 void flyWheelButtonSubscriber() {
   flyWheelSpin = !flyWheelSpin;
   if (flyWheelSpin)
@@ -421,13 +419,13 @@ void RollerArea::update() {
   blue = blueObj.width * blueObj.height;
 };
 
-ROLLER whatIsRoller() {
+enum ROLLER whatIsRoller() {
   rollArea.update();
   if (rollArea.red > 1000 && rollArea.red > rollArea.blue * 5)
     return ROLLER::RED;
   if (rollArea.blue > 1000 && rollArea.blue > rollArea.red * 5)
     return ROLLER::BLUE;
-  return IN_BETWEEN;
+  return ROLLER::IN_BETWEEN;
 };
 
 void visionAidedRoller() {
@@ -446,11 +444,23 @@ void visionAidedRoller() {
   PTOLeft.stop();
   PTORight.stop();
 };
+struct NEW_PRESS {
+  static atomic<bool> R1;
+  static atomic<bool> L1;
+  static atomic<bool> R2;
+  static atomic<bool> L2;
+};
+atomic<bool> NEW_PRESS::R1 = {false};
+atomic<bool> NEW_PRESS::L1 = {false};
+atomic<bool> NEW_PRESS::R2 = {false};
+atomic<bool> NEW_PRESS::L2 = {false};
+
+atomic<bool> PTOWasSwitched = {false};
 
 void shiftKeyStuff() {
   while (1) {
-    if (r1NewPress)
-      if (l1NewPress) {
+    if (NEW_PRESS::R1)
+      if (NEW_PRESS::L1) {
         // pto switch
         PTOToggle();
         PTOWasSwitched = true;
@@ -460,7 +470,7 @@ void shiftKeyStuff() {
         PTORight.spin(fwd, 100, pct);
         printf("intake in\n");
       }
-    else if (l1NewPress)
+    else if (NEW_PRESS::L1)
       printf("shoot\n");
     if (!spinningRoller)
       rollArea.update();
@@ -490,20 +500,20 @@ int main() {
   // R2 -> intake out
   // L1 -> shoot
   // R1 L1 -> pto switch
-  // up -> flywheel toggle
+  // R2 L2 -> flywheel toggle
   // L2 -> roller
 
   // shoot pressed
   Controller1.ButtonL1.pressed([]() {
-    l1NewPress = true;
+    NEW_PRESS::L1 = true;
     wait(200, msec);
-    l1NewPress = false;
+    NEW_PRESS::L1 = false;
   });
   // intake pressed
   Controller1.ButtonR1.pressed([]() {
-    r1NewPress = true;
+    NEW_PRESS::R1 = true;
     wait(200, msec);
-    r1NewPress = false;
+    NEW_PRESS::R1 = false;
   });
   // intake released
   Controller1.ButtonR1.released([]() {
@@ -516,6 +526,9 @@ int main() {
   });
   // outtake pressed
   Controller1.ButtonR2.pressed([]() {
+    // NEW_PRESS::R2 = true;
+    // wait(200, msec);
+    // NEW_PRESS::R2 = false;
     PTOSetTo(PTO::INTAKE);
     PTOLeft.spin(reverse, 100, pct);
     PTORight.spin(reverse, 100, pct);
@@ -528,7 +541,12 @@ int main() {
     printf("intake stopped\n");
   });
 
-  Controller1.ButtonL2.pressed(&visionAidedRoller);
+  Controller1.ButtonL2
+      .pressed(&visionAidedRoller /* []() {
+NEW_PRESS::L2 = true;
+wait(200, msec);
+NEW_PRESS::L2 = false;
+} */);
 
   // flywheel
   Controller1.ButtonUp.pressed(&flyWheelButtonSubscriber);

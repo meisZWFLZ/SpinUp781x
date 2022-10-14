@@ -28,8 +28,8 @@ public:
   // false -> y
   double findTravel(const bool axis, const Position &deltaPos);
 
-  double findTravelX(const double deltaX, const double deltaY, const double deltaHeading);
-  double findTravelY(const double deltaX, const double deltaY, const double deltaHeading);
+  double findTravelX(const Position &deltaPos);
+  double findTravelY(const Position &deltaPos);
 
   Position findRobotPosition();
 

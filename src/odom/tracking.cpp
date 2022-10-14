@@ -29,72 +29,91 @@ void OdomTracking::updateEncoderInches() {
 };
 
 double OdomTracking::findDeltaX(const double deltaTheta) {
-  return deltaTheta == 0
-             ? encoderInches[Robot::Encoders::BACK]
-             : ((2 * sin(deltaTheta / 2))) *
-                   ((encoderInches[Robot::Encoders::BACK] / deltaTheta) +
-                    Robot::Encoders::distanceToTrackingCenter
-                        [Robot::Encoders::BACK]);
+  // vector
+  // return deltaTheta == 0
+  //            ? encoderInches[Robot::Encoders::BACK]
+  //            : ((2 * sin(deltaTheta / 2))) *
+  //                  ((encoderInches[Robot::Encoders::BACK] / deltaTheta) +
+  //                   Robot::Encoders::distanceToTrackingCenter
+  //                       [Robot::Encoders::BACK]);
+  // arc
+
+  return 2 * sin(data.getInertial() / 2) *
+         ((encoderInches[Robot::Encoders::LEFT] / deltaTheta) +
+          Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::LEFT]);
 };
 double OdomTracking::findDeltaY(const double deltaTheta) {
-  return deltaTheta == 0
-             ? encoderInches[Robot::Encoders::LEFT]
-             : ((2 * sin(deltaTheta / 2))) *
-                   ((encoderInches[Robot::Encoders::LEFT] / deltaTheta) +
-                    Robot::Encoders::distanceToTrackingCenter
-                        [Robot::Encoders::LEFT]);
+  // vector
+  // return deltaTheta == 0
+  //            ? encoderInches[Robot::Encoders::LEFT]
+  //            : ((2 * sin(deltaTheta / 2))) *
+  //                  ((encoderInches[Robot::Encoders::LEFT] / deltaTheta) +
+  //                   Robot::Encoders::distanceToTrackingCenter
+  //                       [Robot::Encoders::LEFT]);
+
+  // arc
+  return 2 * sin(data.getInertial() / 2) *
+         ((encoderInches[Robot::Encoders::LEFT] / deltaTheta) +
+          Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::LEFT]);
 };
-double OdomTracking::findDeltaTheta() {
-  // return (encoderInches[Robot::Encoders::LEFT] -
-  //         encoderInches[Robot::Encoders::RIGHT]) /
-  //        (Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::LEFT] +
-  //         Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::RIGHT]);
-  // return data.delta().getInertial(YAW);
-  return data.delta().getInertial();
-};
+double OdomTracking::findDeltaTheta() { return data.delta().getInertial(); };
 
 Position OdomTracking::findDeltaPosition() {
   double deltaTheta = findDeltaTheta();
-  return {findDeltaX(deltaTheta) /* 0 */, findDeltaY(deltaTheta) /* 0 */,
-          deltaTheta};
-  // this->deltaPos1 = {findDeltaX(deltaTheta) /* 0 */,
-  //                    findDeltaY(deltaTheta) /* 0 */, deltaTheta};
-  // return deltaPos1;
+  return {findDeltaX(deltaTheta), findDeltaY(deltaTheta), deltaTheta};
 };
-// axis:
-// true -> X
-// false -> y
-// double OdomTracking::findTravel(const bool axis, const Position &deltaPos) {
-//   double meanDTheta =
-//       data.getPosition().heading /* 0 */ + (deltaPos.heading / 2);
-//   return (axis ? deltaPos.x : deltaPos.y) * ((cos(-meanDTheta))) -
-//          (!axis ? deltaPos.x : deltaPos.y) * ((sin(-meanDTheta)));
-//   // return 0;
-// };
-double OdomTracking::findTravelX(const double deltaX, const double deltaY,
-                                 const double deltaHeading) {
-  double meanDTheta = data.last.yaw /* 0 */ + (deltaHeading / 2);
-  // return (deltaX * cos(meanDTheta));
-  return (deltaX * cos(-meanDTheta)) - (deltaY * sin(-meanDTheta));
-  // deltaPos1.x = DTx;
-  // return DTx;
-  // return findTravel(true, deltaPos) /* 0 */;
+
+// https://en.wikipedia.org/wiki/Fast_inverse_square_root
+float Q_rsqrt(float number) {
+  long i;
+  float x2, y;
+  const float threehalfs = 1.5F;
+
+  x2 = number * 0.5F;
+  y = number;
+  i = *(long *)&y;           // evil floating point bit level hacking
+  i = 0x5f3759df - (i >> 1); // what the fuck?
+  y = *(float *)&i;
+  y = y * (threehalfs - (x2 * y * y)); // 1st iteration (3.4% error)
+  y = y * (threehalfs -
+           (x2 * y * y)); // 2nd iteration, this can be removed (0.17% error)
+
+  return y;
+}
+
+double OdomTracking::findTravelX(const Position &deltaPos) {
+  // bad vector rotation
+  double meanDTheta = data.last.yaw + (deltaPos.heading / 2);
+  return (deltaPos.x * cos(-meanDTheta)) - (deltaPos.y * sin(-meanDTheta));
 };
-double OdomTracking::findTravelY(const double deltaX, const double deltaY,
-                                 const double deltaHeading) {
-  double meanDTheta = data.last.yaw /* 0 */ + (deltaHeading / 2);
-  // return (deltaY * sin(meanDTheta));
-  return (deltaX * sin(-meanDTheta)) - (deltaY * cos(-meanDTheta));
-  // deltaPos1.y = DTy;
-  // return DTy;
-  // return findTravel(false, deltaPos);
+struct coordinate {
+  float x;
+  float y;
+
+  coordinate(const double x, const double y) : x(x), y(y){};
+};
+coordinate findTravelCoord(const Position &deltaPos) {
+  // desmos vector rotation
+  // t = acos(a/sqrt(a^2+b^2);
+  // a_I = sqrt(a^2+b^2)*cos(t + t_I)
+  // b_I = sqrt(a^2+b^2)*sin(t + t_I)
+  float coefficent = Q_rsqrt(pow(deltaPos.x, 2) + pow(deltaPos.y, 2));
+  float t1 =
+      acos(deltaPos.x / Q_rsqrt(pow(deltaPos.x, 2) + pow(deltaPos.y, 2))) +
+      deltaPos.heading;
+  return {(coefficent * cos(t1)), (coefficent * sin(t1))};                                                     
+};
+
+double OdomTracking::findTravelY(const Position &deltaPos) {
+  double meanDTheta = data.last.yaw + (deltaPos.heading / 2);
+  return (deltaPos.x * sin(-meanDTheta)) - (deltaPos.y * cos(-meanDTheta));
 };
 
 Position OdomTracking::findRobotPosition() {
-  Position deltaPos = findDeltaPosition();
-  Position robotPos1 = {findTravelX(deltaPos.x, deltaPos.y, deltaPos.heading),
-                        findTravelY(deltaPos.x, deltaPos.y, deltaPos.heading),
-                        0};
+  // auto coord = findTravelCoord(findDeltaPosition());
+  // Position robotPos1 = {coord.x, coord.y, 0};
+  auto deltaPos = findDeltaPosition();
+  Position robotPos1 = {findTravelX(deltaPos), findTravelY(deltaPos), 0};
 
   // Brain.Screen.setCursor(1, 1);
   // Brain.Screen.clearLine();
