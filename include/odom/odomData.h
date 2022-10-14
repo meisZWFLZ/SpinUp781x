@@ -9,7 +9,8 @@ class OdomData {
 public:
   struct Data {
     double yaw;
-    double vertEnc;
+    double leftEnc;
+    double rightEnc;
     double horiEnc;
 
     Position pos;
@@ -17,7 +18,7 @@ public:
     void set(Data);
     void update(Position pos);
 
-    Data(double yaw, double vertEnc, double horiEnc, Position pos);
+    Data(double yaw, double leftEnc, double rightEnc,double horiEnc, Position pos);
     Data(Position pos);
     Data();
   };
@@ -34,8 +35,8 @@ public:
     const double getEncoderInches(const Robot::Encoders::ENCODER) const;
     const Position getPosition() const;
 
-    const std::array<double, 2> getEncoders() const;
-    const std::array<double, 2> getEncodersInches() const;
+    const std::array<double, 3> getEncoders() const;
+    const std::array<double, 3> getEncodersInches() const;
 
     const Data getData() const;
   };
@@ -52,8 +53,8 @@ public:
   const double getEncoderInches(const Robot::Encoders::ENCODER) const;
   const Position getPosition() const;
 
-  const std::array<double, 2> getEncoders() const;
-  const std::array<double, 2> getEncodersInches() const;
+  const std::array<double, 3> getEncoders() const;
+  const std::array<double, 3> getEncodersInches() const;
 
   const Data getCurrData() const;
   const Data getLastData() const;

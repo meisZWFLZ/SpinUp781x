@@ -1,22 +1,43 @@
 #include "robot.h"
 
 inertial Robot::inertialSensor = Inertial10;
+Robot::Encoders::EncOrMotor::EncOrMotor(motor *motorPtr)
+    : motorPtr(motorPtr), encoderPtr(nullptr), motorPtr2(nullptr),
+      type(Robot::Encoders::EncOrMotor::EncOrMotor::ENCODER_TYPE::MOTOR){};
+Robot::Encoders::EncOrMotor::EncOrMotor(motor *motorPtr, motor *motorPtr2)
+    : motorPtr(motorPtr), encoderPtr(nullptr), motorPtr2(motorPtr2),
+      type(Robot::Encoders::EncOrMotor::EncOrMotor::ENCODER_TYPE::DUAL_MOTOR){};
+Robot::Encoders::EncOrMotor::EncOrMotor(encoder *encoderPtr)
+    : motorPtr(nullptr), encoderPtr(encoderPtr), motorPtr2(nullptr),
+      type(Robot::Encoders::EncOrMotor::EncOrMotor::ENCODER_TYPE::ENCODER){};
 
-std::vector<encoder> Robot::Encoders::encoders = {
-    VertEncoder,  // left
-    // rightEncoder, // right
-    HoriEncoder,  // back
+const double Robot::Encoders::EncOrMotor::position() {
+  switch (type) {
+  case Robot::Encoders::EncOrMotor::EncOrMotor::ENCODER_TYPE::ENCODER:
+    return encoderPtr->position(deg);
+  case Robot::Encoders::EncOrMotor::EncOrMotor::ENCODER_TYPE::MOTOR:
+    return motorPtr->position(deg);
+  case Robot::Encoders::EncOrMotor::EncOrMotor::ENCODER_TYPE::DUAL_MOTOR:
+    return (motorPtr->position(deg) + motorPtr2->position(deg)) / 2;
+  }
+  return 0;
 };
-const double Robot::Dimensions::wheelRadius = 2.75;
 
-constexpr double Ss = 4.93; // left
-// constexpr double Sl = 3.59; // right
-constexpr double Sr = 1.655; // back
+std::vector<Robot::Encoders::EncOrMotor> Robot::Encoders::encoders = {
+    {&VertEncoder}, // right
+    {&VertEncoder}, // left
+    {&HoriEncoder}  // back
+};
+// const double Robot::Dimensions::wheelRadius = 2.75;
 
-const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Ss,/*  Sl, */ Sr};
+constexpr double Ss = 2.375; // back
+constexpr double Sl = 4.375; // right
+constexpr double Sr = 4.375; // left
 
-void Robot::print(){};
+const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {
+    Sr, Sl, Ss};
 
+// void Robot::print(){};
 
-// 4.93 vert
-// 1.655
+// 2.375 vert
+// 4.375

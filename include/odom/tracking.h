@@ -20,7 +20,13 @@ public:
   double findDeltaTheta();
   double findDeltaX(const double thetaDelta);
   double findDeltaY(const double thetaDelta);
+  struct coordinate {
+    float x;
+    float y;
 
+    coordinate(const double x, const double y) : x(x), y(y){};
+  };
+  coordinate findTravelCoord(const Position &deltaPos);
   Position findDeltaPosition();
 
   // axis:
@@ -34,7 +40,7 @@ public:
   Position findRobotPosition();
 
 public:
-  constexpr static const double WAIT_TIME = 20;
+  constexpr static const double WAIT_TIME = 15;
 
   // static void
   // trackingLoop(OdomTracking *); // all operations used to find robot position

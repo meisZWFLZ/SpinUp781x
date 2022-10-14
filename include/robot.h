@@ -19,19 +19,35 @@
 
 class Robot {
 public:
-  static void print();
+  class Dimensions {
+  public:
+    static constexpr float driveWheelRadius = 1.625;
+    static constexpr double driveGearRatio = 3 / 5;
+    static constexpr float encoderWheelRadius = 1.375;
+  };
   class Encoders {
   public:
-    enum ENCODER { LEFT, /* RIGHT, */ BACK };
+    class EncOrMotor {
+    public:
+      enum class ENCODER_TYPE { ENCODER, MOTOR, DUAL_MOTOR };
+      const ENCODER_TYPE type; // true -> enc, false -> motor
+      motor *motorPtr;
+      motor *motorPtr2;
+      encoder *encoderPtr;
+      
+      EncOrMotor(motor *motorPtr);
+      EncOrMotor(motor *motorPtr, motor *motorPtr2);
+      EncOrMotor(encoder *encoderPtr);
 
-    static std::vector<encoder> encoders;
+      const double position();
+    };
+    enum ENCODER { LEFT, RIGHT, BACK };
+
+    static std::vector<EncOrMotor> encoders;
     static const std::vector<double> distanceToTrackingCenter;
   };
   static inertial inertialSensor;
-  class Dimensions {
-  public:
-    static const double wheelRadius;
-  };
+  class Drivetrain {};
 };
 
 #endif

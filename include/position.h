@@ -11,6 +11,7 @@ public:
   Position();
 
   static double distance(const Position &pos1, const Position &pos2);
+  static double distance(const Position &pos1);
 
   static Position difference(const Position &pos1 /* Minuend  */,
                              const Position &pos2 /* Subtrahend */);
