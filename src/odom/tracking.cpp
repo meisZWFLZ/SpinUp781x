@@ -122,19 +122,41 @@ float Q_rsqrt(float number) {
 }
 OdomTracking::coordinate
 OdomTracking::findTravelCoord(const Position &deltaPos) {
+  // ~~~~~~~~~~~~~~~~~~~~
+  // Weird Sqrt Rotation
+  // ~~~~~~~~~~~~~~~~~~~~
+
   // desmos vector rotation: https://www.desmos.com/calculator/txqjvlc2db
   // t = acos(a/sqrt(a^2+b^2);
   // a_I = sqrt(a^2+b^2)*cos(t + t_I)
   // b_I = sqrt(a^2+b^2)*sin(t + t_I)
   // printf("==(%f, %f, %f)", deltaPos.x, deltaPos.y, deltaPos.heading);
-  float invPyth = 1 / sqrt(pow(deltaPos.x, 2) + pow(deltaPos.y, 2));
-  float pythagorean = 1 / invPyth;
-  double t1 =
-      ((/*sign*/ deltaPos.y / abs(deltaPos.y)) * acos(deltaPos.x * invPyth) +
-       (data.last.yaw + (deltaPos.heading / 2)) /*avg orientation*/);
-  if (t1 != t1) // if(t1 == nan)
-    return {pythagorean, 0};
-  return {(pythagorean * cos(t1)), (pythagorean * sin(t1))};
+  // float invPyth = 1 / sqrt(pow(deltaPos.x, 2) + pow(deltaPos.y, 2));
+  // float pythagorean = 1 / invPyth;
+  // double t1 =
+  //     ((/*sign*/ deltaPos.y / abs(deltaPos.y)) * acos(deltaPos.x * invPyth) +
+  //      (data.last.yaw + (deltaPos.heading / 2)) /*avg orientation*/);
+  // if (t1 != t1) // if(t1 == nan)
+  //   return {pythagorean, 0};
+  // return {(pythagorean * cos(t1)), (pythagorean * sin(t1))};
+
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~
+  // Polar Conversion (atan2)
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  // const float newAngle =
+  //     atan2(deltaPos.x, deltaPos.y) - (data.last.yaw + (deltaPos.heading /
+  //     2));
+  // const float magnitude = Position::distance(deltaPos);
+  // return {magnitude * sin(newAngle), magnitude * cos(newAngle)};
+
+  // stole from pilons:
+  // https://github.com/nickmertin/5225A-2017-2018/blob/master/src/auto.c
+  const float globalAngle = data.curr.yaw;
+  float cosP = cos(globalAngle);
+  float sinP = sin(globalAngle);
+  return {(deltaPos.y * sinP) + (deltaPos.x * cosP),
+          (deltaPos.y * cosP) + (deltaPos.x * -sinP)};
 };
 
 double OdomTracking::findTravelY(const Position &deltaPos) {
@@ -212,17 +234,32 @@ Position OdomTracking::getRobotPosition() {
   //            snapshot.getEncod
   return data.getPosition();
 };
+//
+inline constexpr bool changeCheck(const float diff, const float limit) {
+  return abs(diff) > limit;
+}
 
 std::vector<OdomTracking *> trackers = {};
 void trackerLoop() {
   OdomTracking *tracker = trackers[trackers.size() - 1];
+  // int lastMsec = 0 /* timer::system() */;
+  // int time = 0;
+  // int index = 0;
+  // float runningAve = 0;
   while (1) {
     tracker->updateEncoderInches();
-    if (tracker->encoderInches[0] != 0 || tracker->encoderInches[1] != 0 ||
-        std::abs(tracker->data.delta().getInertial()) > 0.0001) {
+    if (changeCheck(tracker->encoderInches[0], 0.01) ||
+        changeCheck(tracker->encoderInches[1], 0.01) ||
+        changeCheck(tracker->data.delta().getInertial(), 0.0001)) {
+
+      // lastMsec = timer::system();
       tracker->updateSnapshot(tracker->findRobotPosition());
+      // time = timer::system();
+      // runningAve = runningAve * index / (index + 1) + (time - lastMsec) /
+      // index; index++; printf("%d\n", time - lastMsec);
+
     } else
-      tracker->updateSnapshot({});
+      tracker->data.noChangeUpdate();
 
     wait(OdomTracking::WAIT_TIME, msec);
   }

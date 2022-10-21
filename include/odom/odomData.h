@@ -17,8 +17,10 @@ public:
 
     void set(Data);
     void update(Position pos);
+    void noChangeUpdate();
 
-    Data(double yaw, double leftEnc, double rightEnc,double horiEnc, Position pos);
+    Data(double yaw, double leftEnc, double rightEnc, double horiEnc,
+         Position pos);
     Data(Position pos);
     Data();
   };
@@ -40,12 +42,13 @@ public:
 
     const Data getData() const;
   };
-  Position pain = {};
+  // Position pain = {};
 
   Data last;
   Data curr;
 
   void update(Position roborPos);
+  void noChangeUpdate();
 
   // getters
   const double getInertial() const;

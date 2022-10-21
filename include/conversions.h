@@ -17,23 +17,23 @@ inline constexpr const double toDegrees(const double Radians) {
 } // namespace Radians
 namespace EncoderRadians {
 inline constexpr const double toInches(const double encoderRadians) {
-  return 2 * encoderRadians * Robot::Dimensions::encoderWheelRadius;
+  return encoderRadians * Robot::Dimensions::encoderWheelRadius;
 };
 } // namespace EncoderRadians
 namespace EncoderInches {
 inline constexpr const double toRadians(const double encoderInches) {
-  return encoderInches / (2 * Robot::Dimensions::encoderWheelRadius);
+  return encoderInches / (Robot::Dimensions::encoderWheelRadius);
 };
 } // namespace EncoderInches
 namespace MotorRadians {
 inline constexpr const double toInches(const double motorRadians) {
-  return 2 * motorRadians * Robot::Dimensions::driveWheelRadius *
+  return motorRadians * Robot::Dimensions::driveWheelRadius *
          Robot::Dimensions::driveGearRatio;
 };
 } // namespace MotorRadians
 namespace MotorInches {
 inline constexpr const double toRadians(const double motorInches) {
-  return motorInches / (2 * Robot::Dimensions::driveWheelRadius *
+  return motorInches / (Robot::Dimensions::driveWheelRadius *
                         Robot::Dimensions::driveGearRatio);
 };
 } // namespace MotorInches

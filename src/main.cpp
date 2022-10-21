@@ -660,6 +660,17 @@ int main() {
       Controller1.Screen.print(")");
       Controller1.Screen.newLine();
       wait(20, msec);
+
+      Brain.Screen.clearLine();
+      Brain.Screen.print("(");
+      Brain.Screen.print(robotPos1.x);
+      Brain.Screen.print(",");
+      Brain.Screen.print(robotPos1.y);
+      Brain.Screen.print(",");
+      Brain.Screen.print(robotPos1.heading);
+      Brain.Screen.print(")");
+      Brain.Screen.newLine();
+      wait(20, msec);
     }
   }));
 

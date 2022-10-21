@@ -123,3 +123,17 @@ const std::array<double, 3> OdomData::DeltaData::getEncodersInches() const {
 };
 
 OdomData::OdomData(const Position startPos) : last({{}}), curr({startPos}){};
+
+void OdomData::Data::noChangeUpdate() {
+  yaw = Conversions::Degrees::toRadians(Robot::inertialSensor.heading(degrees));
+  leftEnc = Conversions::Degrees::toRadians(
+      Robot::Encoders::encoders[Robot::Encoders::ENCODER::LEFT].position());
+  rightEnc = Conversions::Degrees::toRadians(
+      Robot::Encoders::encoders[Robot::Encoders::ENCODER::RIGHT].position());
+  horiEnc = Conversions::Degrees::toRadians(
+      Robot::Encoders::encoders[Robot::Encoders::ENCODER::BACK].position());
+
+  pos.heading = yaw;
+};
+
+void OdomData::noChangeUpdate() { curr.noChangeUpdate(); };
