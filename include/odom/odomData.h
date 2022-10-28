@@ -3,7 +3,7 @@
 #include <array>
 
 #ifndef ODOM_ODOMDATA_H
-#define ODOMDATA_H
+#define ODOM_ODOMDATA_H
 
 class OdomData {
 public:

@@ -25,6 +25,9 @@ extern signature VisionSensor__SIG_5;
 extern signature VisionSensor__SIG_6;
 extern signature VisionSensor__SIG_7;
 extern vision VisionSensor;
+extern motor_group Catapult1;
+extern limit CatapultLimitSwitch;
+extern digital_out ExpansionPiston;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

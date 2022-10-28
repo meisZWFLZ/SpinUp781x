@@ -152,7 +152,7 @@ OdomTracking::findTravelCoord(const Position &deltaPos) {
 
   // stole from pilons:
   // https://github.com/nickmertin/5225A-2017-2018/blob/master/src/auto.c
-  const float globalAngle = data.curr.yaw;
+  const float globalAngle = data.curr.yaw - (deltaPos.heading / 2);
   float cosP = cos(globalAngle);
   float sinP = sin(globalAngle);
   return {(deltaPos.y * sinP) + (deltaPos.x * cosP),
@@ -240,6 +240,8 @@ inline constexpr bool changeCheck(const float diff, const float limit) {
 }
 
 std::vector<OdomTracking *> trackers = {};
+const Position Robot::getPosition() { return trackers[0]->getRobotPosition(); };
+
 void trackerLoop() {
   OdomTracking *tracker = trackers[trackers.size() - 1];
   // int lastMsec = 0 /* timer::system() */;
@@ -267,6 +269,7 @@ void trackerLoop() {
 
 OdomTracking::OdomTracking(Position startPos) : data(startPos) {
   trackers.push_back(this);
+  displayPositon(data.curr.pos);
   (thread(trackerLoop));
   // displayPositon(snapshot.getPosition());
   // snapshot = SensorSnapshot::root(startPos);
