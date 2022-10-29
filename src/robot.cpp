@@ -1,6 +1,8 @@
 #include "robot.h"
+#include "coordinate.h"
 
 enum Robot::PTO_STATE Robot::PTOState = {Robot::PTO_STATE::INTAKE};
+enum Robot::TEAM Robot::team = Robot::TEAM::RED;
 
 inertial Robot::inertialSensor = Inertial10;
 Robot::Encoders::EncOrMotor::EncOrMotor(motor *motorPtr)
@@ -43,9 +45,9 @@ const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Sr, Sl,
 
 // 2.375 vert
 // 4.375
-const void Robot::Catapult::release() { Catapult1.spinFor(reverse, 5, deg); }
+const void Robot::Catapult::release() { Catapult1.spinFor(reverse, 10, deg); }
 const void Robot::Catapult::retract() {
-  Catapult1.spin(reverse, 10, pct);
+  Catapult1.spin(reverse, 70, pct);
   while (!CatapultLimitSwitch.pressing())
     wait(5, msec);
   Catapult1.stop();
@@ -112,3 +114,78 @@ const void Robot::Drivetrain::right(const float pct) {
   for (auto i = motors.begin(); i != motors.end(); ++i)
     i->spin(fwd, pct, percent);
 };
+namespace roller {
+
+enum class ROLLER : int { RED, BLUE, IN_BETWEEN } ROLLER;
+
+static const bool operator==(const enum Robot::TEAM team1,
+                             const enum ROLLER roller1) {
+  return (int)team1 == (int)roller1;
+};
+static const bool operator==(const enum ROLLER roller1,
+                             const enum Robot::TEAM team1) {
+  return (int)team1 == (int)roller1;
+};
+
+struct RollerArea {
+public:
+  int red;
+  int blue;
+  Coordinate redC;
+  Coordinate blueC;
+  void update();
+  RollerArea();
+};
+
+std::atomic<bool> spinningRoller = {false};
+RollerArea rollArea = {};
+
+RollerArea::RollerArea() : red(0), blue(0), redC(0, 0), blueC(0, 0) {}
+void RollerArea::update() {
+  VisionSensor.takeSnapshot(VisionSensor__RED_ROLLER);
+  vision::object redObj = VisionSensor.largestObject;
+  red = redObj.width * redObj.height;
+  redC = {static_cast<double>(redObj.centerX),
+          static_cast<double>(redObj.centerY)};
+  VisionSensor.takeSnapshot(VisionSensor__BLUE_ROLLER);
+  vision::object blueObj = VisionSensor.largestObject;
+  blue = blueObj.width * blueObj.height;
+  blueC = {static_cast<double>(blueObj.centerX),
+           static_cast<double>(blueObj.centerY)};
+
+  printf("updating\n");
+};
+
+enum ROLLER whatIsRoller() {
+  rollArea.update();
+  if (rollArea.red > 200 && rollArea.blue > 200 &&
+      rollArea.redC.y < rollArea.blueC.y)
+    return ROLLER::RED;
+  if (rollArea.red > 200 && rollArea.blue > 200 &&
+      rollArea.redC.y > rollArea.blueC.y)
+    return ROLLER::BLUE;
+  return ROLLER::IN_BETWEEN;
+};
+
+void visionAidedRoller() {
+  if (whatIsRoller() == Robot::team)
+    return;
+  Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
+  spinningRoller = true;
+  PTOLeft.spin(fwd, 25, pct);
+  PTORight.spin(fwd, 25, pct);
+  while (!(whatIsRoller() == Robot::team)) {
+    printf("%f", whatIsRoller());
+    printf("vision roller\n");
+    wait(10, msec);
+  }
+  wait(50, msec);
+  // if (!(whatIsRoller() == Robot::team))
+  //   visionAidedRoller();
+  spinningRoller = false;
+  PTOLeft.stop();
+  PTORight.stop();
+};
+
+} // namespace roller
+const void Robot::Actions::roller() { roller::visionAidedRoller(); };

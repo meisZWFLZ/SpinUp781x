@@ -56,6 +56,7 @@ public:
   };
   enum class GOAL : int { MY_TEAM, RED, BLUE };
   enum class TEAM : bool { RED, BLUE } TEAM;
+  static enum TEAM team;
   class Catapult {
   public:
     static const void retract();
@@ -63,6 +64,7 @@ public:
   };
   enum class PTO_STATE : bool { DRIVE, INTAKE };
   static enum PTO_STATE PTOState;
+  enum class CATAPULT_STATE : bool { UP, DOWN };
   class Actions {
   public:
     static const void shoot(const Robot::GOAL);
@@ -75,7 +77,7 @@ public:
     static const void goTo(const Position pos); // to do
   };
   static const Position getPosition();
+  static const CATAPULT_STATE catapultState();
 };
-#include "odom/tracking.h"
 
 #endif

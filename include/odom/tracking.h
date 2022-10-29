@@ -41,7 +41,7 @@ public:
 
 public:
   constexpr static const double WAIT_TIME = 10;
-
+  void reset(const Position pos);
   // static void
   // trackingLoop(OdomTracking *); // all operations used to find robot position
 

@@ -1,3 +1,6 @@
+#ifndef COORDINATE_H
+#define COORDINATE_H
+
 struct Coordinate {
   float x;
   float y;
@@ -12,3 +15,5 @@ struct Coordinate {
 
   Coordinate(const double x, const double y) : x(x), y(y){};
 };
+
+#endif

@@ -267,6 +267,12 @@ void trackerLoop() {
   }
 };
 
+void OdomTracking::reset(const Position pos) {
+  data.curr.pos = pos;
+  data.last.pos = pos;
+  Inertial10.setHeading(Conversions::Radians::toDegrees(pos.heading), deg);
+};
+
 OdomTracking::OdomTracking(Position startPos) : data(startPos) {
   trackers.push_back(this);
   displayPositon(data.curr.pos);

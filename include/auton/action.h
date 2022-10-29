@@ -42,7 +42,7 @@ public:
 };
 class GoTo : public Action {
 private:
-  const Position target;
+  const Position pos;
 
 public:
   GoTo(const Position target);
