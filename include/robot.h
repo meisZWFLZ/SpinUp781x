@@ -67,6 +67,7 @@ public:
   enum class CATAPULT_STATE : bool { UP, DOWN };
   class Actions {
   public:
+    // static const void keepCataDown();
     static const void shoot(const Robot::GOAL);
     static const void intake();
     static const void outtake();

@@ -136,6 +136,46 @@
 // VisionSensor         vision        12
 // Catapult1            motor_group   13, 14
 // CatapultLimitSwitch  limit         G
+// ExpansionPiston      digital_out   F
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller
+// PTOLeft              motor         2
+// PTORight             motor         3
+// PTOPiston            digital_out   H
+// LeftDriveA           motor         4
+// LeftDriveB           motor         5
+// RightDriveA          motor         6
+// RightDriveB          motor         11
+// FlyWheel             motor_group   8, 9
+// HoriEncoder          encoder       A, B
+// VertEncoder          encoder       C, D
+// Inertial10           inertial      1
+// VisionSensor         vision        12
+// Catapult1            motor_group   13, 14
+// CatapultLimitSwitch  limit         G
+// ExpansionPiston      digital_out   F
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller
+// PTOLeft              motor         2
+// PTORight             motor         3
+// PTOPiston            digital_out   H
+// LeftDriveA           motor         4
+// LeftDriveB           motor         5
+// RightDriveA          motor         6
+// RightDriveB          motor         11
+// FlyWheel             motor_group   8, 9
+// HoriEncoder          encoder       A, B
+// VertEncoder          encoder       C, D
+// Inertial10           inertial      1
+// VisionSensor         vision        12
+// Catapult1            motor_group   13, 14
+// CatapultLimitSwitch  limit         G
 // DigitalOutF          digital_out   F
 // ---- END VEXCODE CONFIGURED DEVICES ----
 // ---- START VEXCODE CONFIGURED DEVICES ----
@@ -661,8 +701,9 @@ void shiftKeyStuff() {
         printf("intake in\n");
       }
     else if (NEW_PRESS::L1) {
-      printf("shoot\n");
-      shootListener();
+      Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
+      // printf("shoot\n");
+      // shootListener();
     }
 
     // if (!spinningRoller)
@@ -677,16 +718,17 @@ void shiftKeyStuff() {
 void controllerDisplay(OdomTracking);
 
 void motorSetup() {
-  FlyWheel.setStopping(coast);
+  // FlyWheel.setStopping(coast);
+  ExpansionPiston.set(false);
 
-  Catapult1.setStopping(brake);
+  Catapult1.setStopping(hold);
 
   LeftDriveA.setStopping(coast);
   LeftDriveB.setStopping(coast);
   RightDriveA.setStopping(coast);
   RightDriveB.setStopping(coast);
 
-  PTOPiston.set(true);
+  PTOPiston.set(false);
 }
 
 // void tracking() {
@@ -802,7 +844,11 @@ public:
     Brain.Screen.pressed(AutonSelection::listener);
     print();
   };
-  static void run() { autonArr[autonPos](); };
+  static void run() {
+    Brain.Screen.setFont(monoL);
+    Brain.Screen.setFillColor(transparent);
+    autonArr[autonPos]();
+  };
 };
 std::vector<std::function<void(void)>> AutonSelection::autonArr = {};
 int AutonSelection::autonPos = 0;
@@ -811,27 +857,202 @@ int AutonSelection::autonPos = 0;
 //   static int autoPos = 0;
 //   static const std::vector<std::function<void(void)>> autonArr = autonArr1;
 // }
+competition Competition;
+void autonomous() {
+  Robot::Drivetrain::left(10);
+  Robot::Drivetrain::right(10);
+  wait(250, msec);
+  AutonSelection::run();
+  // Robot::Actions::outtake();
+  // Robot::Drivetrain::left(-10);
+  // Robot::Drivetrain::right(-10);
+  wait(250, msec);
+  // Robot::Actions::stopIntake();
+  Robot::Drivetrain::left(0);
+  Robot::Drivetrain::right(0);
+  // Robot::Drivetrain::left(30);
+  // Robot::Drivetrain::right(30);
+  // wait(750, msec);
+  // // AutonSelection::run();
+  // Robot::Actions::outtake();
+  // Robot::Drivetrain::left(-15);
+  // Robot::Drivetrain::right(-15);
+  // wait(750, msec);
+  // Robot::Actions::stopIntake();
+  // Robot::Drivetrain::left(0);
+  // Robot::Drivetrain::right(0);
+};
+void driverControl() {
+  thread([] { controllerDisplay({{}}); });
+  // drive code
+  Controller1.Axis2.changed(&rightDriveSubscriber);
+  Controller1.Axis3.changed(&leftDriveSubscriber);
 
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    START CATA TEST
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Controller1.ButtonUp.pressed([]() {
+    Catapult1.spin(fwd, 100, pct);
+    while (Controller1.ButtonUp.pressing()) {
+      wait(10, msec);
+    }
+    Catapult1.stop();
+  });
+  Controller1.ButtonDown.pressed([]() {
+    Catapult1.spin(reverse, 100, pct);
+    while (Controller1.ButtonDown.pressing()) {
+      wait(10, msec);
+    }
+    Catapult1.stop();
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    END CATA TEST
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  // R1 -> intake in
+  // R2 -> intake out
+  // L1 -> shoot
+  // R1 L1 -> pto switch
+  // R2 L2 -> flywheel toggle
+  // L2 -> roller
+  // a b -> expansion
+
+  // shoot pressed
+  Controller1.ButtonL1.pressed([]() {
+    NEW_PRESS::L1 = true;
+    wait(100, msec);
+    NEW_PRESS::L1 = false;
+  });
+  // intake pressed
+  Controller1.ButtonR1.pressed([]() {
+    NEW_PRESS::R1 = true;
+    wait(100, msec);
+    NEW_PRESS::R1 = false;
+  });
+  // intake released
+  Controller1.ButtonR1.released([]() {
+    if (!PTOWasSwitched) {
+      PTOLeft.stop();
+      PTORight.stop();
+      printf("intake stopped\n");
+    } else
+      PTOWasSwitched = false;
+  });
+  // outtake pressed
+  Controller1.ButtonR2.pressed([]() {
+    // NEW_PRESS::R2 = true;
+    // wait(200, msec);
+    // NEW_PRESS::R2 = false;
+    Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
+    PTOLeft.spin(reverse, 12, volt);
+    PTORight.spin(reverse, 12, volt);
+    printf("intake in\n");
+  });
+  // outtake released
+  Controller1.ButtonR2.released([]() {
+    PTOLeft.stop();
+    PTORight.stop();
+    printf("intake stopped\n");
+  });
+
+  Controller1.ButtonL2
+      .pressed(
+          &visionAidedRoller /* []() {
+  NEW_PRESS::L2 = true;
+  wait(200, msec);
+  NEW_PRESS::L2 = false;
+  } */);
+
+  // flywheel
+  // Controller1.ButtonUp.pressed(&flyWheelButtonSubscriber);
+  // temp testing flywheel
+  // Brain.Screen.pressed(&flyWheelButtonSubscriber);
+
+  // start shiftKeyNonsense
+  Controller1.ButtonA.pressed([] {
+    if (Controller1.ButtonB.pressing())
+      Robot::Actions::expand();
+  });
+  Controller1.ButtonB.pressed([] {
+    if (Controller1.ButtonA.pressing())
+      Robot::Actions::expand();
+  });
+
+  thread Thread;
+  (thread(shiftKeyStuff));
+
+  // Controller1.ButtonA.pressed([]() {
+  //   while (abs(tracker1->getRobotPosition().heading - M_PI) > 0.01)
+  //     printf("%f\n", tracker1->getRobotPosition().heading);
+  // });
+
+  // ANYTHING AFTER THIS FUNCTION WILL NOT BE EXECUTED
+  // controllerDisplay({{}});
+}
+void preAuton() {
+  using namespace auton;
+  AutonSelection::start({[] {
+                           //  Path({new Roller()}).execute();
+                           //  tracker->reset(Robot::team == Robot::TEAM::RED
+                           //                     ? elements::ROLLER::BLUE_LEFT
+                           //                     : elements::ROLLER::RED_LEFT);
+                            PTOLeft.setPosition(0, deg);
+                            PTORight.setPosition(0, deg);
+                            PTOLeft.spin(fwd, -100, pct);
+                            PTORight.spin(fwd, -100, pct);
+                           //  int lastPos
+                            while ((PTOLeft.position(turns) +
+                            PTORight.position(turns)) / 2 < 2)
+                              wait(10, msec);
+                            PTOLeft.stop();
+                            PTORight.stop();
+                         },
+                         [] {
+                           //  tracker->reset({60, 60, 0});
+                         }});
+}
 int main() {
   vexcodeInit();
-
+  // return 1;
   motorSetup();
 
+  Robot::team = Robot::TEAM::BLUE;
+
+  OdomTracking tracker1 = {{}};
+  tracker = &tracker1;
+
+  tracker->reset({35, 135, 0});
   Inertial10.calibrate(2);
   // wait until inertial finsished calibrating
   while (Inertial10.isCalibrating())
     wait(20, msec);
 
-  // drive code
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    START COMPETITION
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  // Competition.autonomous(autonomous);
+  // Competition.drivercontrol(driverControl);
+  preAuton();
+  driverControl();
+  while (1) {
+    wait(100, msec);
+  }
+  return 1;
+
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    END COMPETITION
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  // drivetrain code
   Controller1.Axis2.changed(&rightDriveSubscriber);
   Controller1.Axis3.changed(&leftDriveSubscriber);
 
   // odometry
-  OdomTracking tracker1 = {{}};
-  tracker = &tracker1;
 
   // team
-  Robot::team = Robot::TEAM::RED;
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //    START CATA TEST
@@ -839,20 +1060,20 @@ int main() {
 
   // Catapult1.setVelocity(100, percent);
 
-  // Controller1.ButtonUp.pressed([]() {
-  //   Catapult1.spin(fwd, 100, pct);
-  //   while (Controller1.ButtonUp.pressing()) {
-  //     wait(10, msec);
-  //   }
-  //   Catapult1.stop();
-  // });
-  // Controller1.ButtonDown.pressed([]() {
-  //   Catapult1.spin(reverse, 100, pct);
-  //   while (Controller1.ButtonDown.pressing()) {
-  //     wait(10, msec);
-  //   }
-  //   Catapult1.stop();
-  // });
+  Controller1.ButtonUp.pressed([]() {
+    Catapult1.spin(fwd, 100, pct);
+    while (Controller1.ButtonUp.pressing()) {
+      wait(10, msec);
+    }
+    Catapult1.stop();
+  });
+  Controller1.ButtonDown.pressed([]() {
+    Catapult1.spin(reverse, 100, pct);
+    while (Controller1.ButtonDown.pressing()) {
+      wait(10, msec);
+    }
+    Catapult1.stop();
+  });
 
   // return 1;
 
@@ -864,15 +1085,8 @@ int main() {
   //    START AUTON TESTING
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  AutonSelection::start({
-      []() { printf("1: %i", (int)Robot::team); },
-      []() { printf("2: %i", (int)Robot::team); },
-      []() { printf("3: %i", (int)Robot::team); },
-  });
-
   // auto x = []() {
   //   using namespace auton;
-  //   tracker->reset({60, 60, 0});
   //   Path({
   //            new GoTo(Robot::team == Robot::TEAM::BLUE
   //                         ? elements::ROLLER::BLUE_LEFT
@@ -888,64 +1102,47 @@ int main() {
   //        })
   //       .execute();
   // };
-  tracker->reset(elements::ROLLER::LEFT);
-  Controller1.ButtonX.pressed([]() {
-    []() {
-      using namespace auton;
-      Coordinate firstRoller = Robot::team == Robot::TEAM::BLUE
-                                   ? elements::ROLLER::BLUE_LEFT
-                                   : elements::ROLLER::RED_LEFT;
-      Path({
-        new Roller()
-        //  new GoTo({firstRoller.x, firstRoller.y, M_PI * 3 / 2}),
-        //  new Wait(500),
-        //  new Roller(),
-        //  new GoTo(Robot::team == Robot::TEAM::BLUE
-        //               ? elements::ROLLER::BLUE_RIGHT
-        //               : elements::ROLLER::RED_RIGHT),
-        //  new Roller(),
-        //  new GoTo(Robot::team == Robot::TEAM::BLUE
-        //               ? elements::ROLLER::BLUE_LEFT
-        //               : elements::ROLLER::RED_LEFT),
-      }).execute();
-    }();
-  });
-  (thread([]() {
-    Position robotPos1;
+  // tracker->reset(elements::ROLLER::LEFT);
+  // Controller1.ButtonX.pressed([]() {
+  //   []() {
 
-    while (1) {
-      Controller1.Screen.setCursor(0, 0);
+  // });
+  // (thread([]() {
+  //   Position robotPos1;
 
-      robotPos1 = tracker->getRobotPosition();
-      Controller1.Screen.clearLine();
-      Controller1.Screen.print("(");
-      Controller1.Screen.print(robotPos1.x);
-      Controller1.Screen.print(",");
-      Controller1.Screen.print(robotPos1.y);
-      Controller1.Screen.print(",");
-      Controller1.Screen.print(robotPos1.heading);
-      Controller1.Screen.print(")");
-      Controller1.Screen.newLine();
-      wait(20, msec);
+  //   while (1) {
+  //     Controller1.Screen.setCursor(0, 0);
 
-      Brain.Screen.clearLine();
-      Brain.Screen.print("(");
-      Brain.Screen.print(robotPos1.x);
-      Brain.Screen.print(",");
-      Brain.Screen.print(robotPos1.y);
-      Brain.Screen.print(",");
-      Brain.Screen.print(robotPos1.heading);
-      Brain.Screen.print(")");
-      Brain.Screen.newLine();
-      wait(20, msec);
-    }
-  }));
+  //     robotPos1 = tracker->getRobotPosition();
+  //     Controller1.Screen.clearLine();
+  //     Controller1.Screen.print("(");
+  //     Controller1.Screen.print(robotPos1.x);
+  //     Controller1.Screen.print(",");
+  //     Controller1.Screen.print(robotPos1.y);
+  //     Controller1.Screen.print(",");
+  //     Controller1.Screen.print(robotPos1.heading);
+  //     Controller1.Screen.print(")");
+  //     Controller1.Screen.newLine();
+  //     wait(20, msec);
+
+  //     Brain.Screen.clearLine();
+  //     Brain.Screen.print("(");
+  //     Brain.Screen.print(robotPos1.x);
+  //     Brain.Screen.print(",");
+  //     Brain.Screen.print(robotPos1.y);
+  //     Brain.Screen.print(",");
+  //     Brain.Screen.print(robotPos1.heading);
+  //     Brain.Screen.print(")");
+  //     Brain.Screen.newLine();
+  //     wait(20, msec);
+  //   }
+  // }));
   // Controller1.ButtonX.pressed([]() {
   //   auton::GoTo goTo = {{}};
   //   goTo.execute();
   // });
 
-  return 1;
+  // return 1;
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //    END AUTON TESTING
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1185,7 +1382,8 @@ NEW_PRESS::L2 = false;
 
   //   // subscribeReleasedListener(Button::UNSTUCK_INTAKE,
   //   //                           &unstuckIntakeReleasedSubscriber);
-  //   // subscribeReleasedListener(Button::INTAKE, &intakeReleasedSubscriber);
+  //   // subscribeReleasedListener(Button::INTAKE,
+  //   &intakeReleasedSubscriber);
 
   //     // subscribeAxisListener(Axis::LEFT_DRIVE, &leftDriveSubscriber);
   //     // subscribeAxisListener(Axis::RIGHT_DRIVE, &rightDriveSubscriber);
@@ -1196,7 +1394,8 @@ NEW_PRESS::L2 = false;
 
 void controllerDisplay(OdomTracking tracker1) {
   {
-    tracker = &tracker1;
+    Brain.Screen.clearScreen();
+    // tracker = &tracker1;
     Position robotPos1;
     while (1) {
       // reset
@@ -1208,33 +1407,38 @@ void controllerDisplay(OdomTracking tracker1) {
       // Controller1.Screen.print(shots);
       // Controller1.Screen.newLine();
       // PTO State
-      Controller1.Screen.clearLine();
-      if (PTOState == PTO::INTAKE)
-        Controller1.Screen.print("intake");
-      else
-        Controller1.Screen.print("drive");
-      Controller1.Screen.newLine();
+      // Controller1.Screen.clearLine();
+      // if (PTOState == PTO::INTAKE)
+      //   Controller1.Screen.print("intake");
+      // else
+      //   Controller1.Screen.print("drive");
+      // Controller1.Screen.newLine();
 
       // // Deez Nuts
       // Controller1.Screen.clearLine();
       // Controller1.Screen.print(/* "deez nuts" */ tracker.deltaPos1.x);
-      // // Controller1.Screen.print(/* "deez nuts" */ tracker.data.curr.pos.x);
+      // // Controller1.Screen.print(/* "deez nuts" */
+      // tracker.data.curr.pos.x);
 
       // temp
       Controller1.Screen.clearLine();
-      Controller1.Screen.print("left: ");
-      Controller1.Screen.print(
-          (LeftDriveA.temperature(pct) + LeftDriveB.temperature(pct)) / 2);
+      Controller1.Screen.print("drive: ");
+      Controller1.Screen.print((LeftDriveA.temperature(fahrenheit) +
+                                LeftDriveB.temperature(fahrenheit) +
+                                RightDriveA.temperature(fahrenheit) +
+                                RightDriveB.temperature(fahrenheit)) /
+                               4);
+      Controller1.Screen.print(" F");
       Controller1.Screen.newLine();
 
       Controller1.Screen.clearLine();
-      Controller1.Screen.print("right: ");
-      Controller1.Screen.print(
-          (RightDriveA.temperature(pct) + RightDriveB.temperature(pct)) / 2);
+      Controller1.Screen.print("cata: ");
+      Controller1.Screen.print(Catapult1.temperature(fahrenheit));
+      Controller1.Screen.print(" F");
       Controller1.Screen.newLine();
 
       // tracking
-      robotPos1 = tracker->getRobotPosition();
+      robotPos1 = Robot::getPosition();
       Brain.Screen.setCursor(1, 1);
       Brain.Screen.clearLine();
       Brain.Screen.print("(");
@@ -1246,15 +1450,15 @@ void controllerDisplay(OdomTracking tracker1) {
       Brain.Screen.print(")");
       Brain.Screen.newLine();
 
-      // Controller1.Screen.clearLine();
-      // Controller1.Screen.print("(");
-      // Controller1.Screen.print(robotPos1.x);
-      // Controller1.Screen.print(",");
-      // Controller1.Screen.print(robotPos1.y);
-      // Controller1.Screen.print(",");
-      // Controller1.Screen.print(robotPos1.heading);
-      // Controller1.Screen.print(")");
-      // Controller1.Screen.newLine();
+      Controller1.Screen.clearLine();
+      Controller1.Screen.print("(");
+      Controller1.Screen.print(robotPos1.x);
+      Controller1.Screen.print(",");
+      Controller1.Screen.print(robotPos1.y);
+      Controller1.Screen.print(",");
+      Controller1.Screen.print(robotPos1.heading);
+      Controller1.Screen.print(")");
+      Controller1.Screen.newLine();
 
       wait(50, msec);
     }

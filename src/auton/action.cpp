@@ -20,8 +20,8 @@ void auton::GoTo::execute() const {
   float distance = Position::distance(pos, Robot::getPosition());
   float headingDiff = 0;
   while (distance > 1) {
-    if (Controller1.ButtonA.pressing())
-      break;
+    // if (Controller1.ButtonA.pressing())
+    //   break;
 
     const Position vector = Position::difference(pos, robotPos);
     printf(")distance:%f\n", distance);
@@ -73,8 +73,8 @@ void auton::GoTo::execute() const {
   // return;
   headingDiff = headingDifference(pos.heading, robotPos.heading);
   while (std::abs(headingDiff) > 0.1) {
-    if (Controller1.ButtonA.pressing())
-      break;
+    // if (Controller1.ButtonA.pressing())
+    //   break;
 
     const float target = pos.heading;
     const float heading1 = robotPos.heading;

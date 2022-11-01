@@ -45,29 +45,61 @@ const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Sr, Sl,
 
 // 2.375 vert
 // 4.375
-const void Robot::Catapult::release() { Catapult1.spinFor(reverse, 10, deg); }
-const void Robot::Catapult::retract() {
-  Catapult1.spin(reverse, 70, pct);
-  while (!CatapultLimitSwitch.pressing())
+const void Robot::Catapult::release() {
+  Catapult1.spin(reverse, 100, pct);
+  // Catapult1.spinFor(reverse, , deg);
+  while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+    // printf("limit: %ld", CatapultLimitSwitch.pressing());
     wait(5, msec);
+  }
+  while (CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+    // printf("limit: %ld", CatapultLimitSwitch.pressing());
+    wait(5, msec);
+  }
   Catapult1.stop();
 }
+const void Robot::Catapult::retract() {
+  Catapult1.spin(reverse, 100, pct);
+  while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+    // printf("limit: %ld", CatapultLimitSwitch.pressing());
+    wait(5, msec);
+  }
+  Catapult1.stop();
+}
+// bool shooting = true;s
+static bool shooting = false;
 const void Robot::Actions::shoot(const enum Robot::GOAL goal) {
-  static bool readyToShoot = true;
-  if (readyToShoot) {
-    readyToShoot = false;
+  if (!shooting && !Controller1.ButtonY.pressing()) {
+    shooting = true;
+    Robot::Actions::stopIntake();
     thread([]() {
       Robot::Catapult::release();
-      wait(300, msec);
       Robot::Catapult::retract();
-      readyToShoot = true;
+      shooting = false;
     });
   }
 };
+const void keepCataDown(){
+    // static bool running = false;
+    // if (!running)
+    //   thread([]() {
+    //     running = true;
+    //     while (!Controller1.ButtonLeft.pressing()) {
+    //       if ()
+    //       while(!shooting && !CatapultLimitSwitch.pressing()) {
+    //         Catapult1.spin(reverse, 100, pct);
+    //       }
+
+    //     }
+    //     Robot::Catapult::retract();
+    //   });
+};
 const void Robot::Actions::intake() {
-  Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
-  PTOLeft.spin(fwd, 100, pct);
-  PTORight.spin(fwd, 100, pct);
+  if (CatapultLimitSwitch.pressing() && !shooting) {
+    Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
+    PTOLeft.spin(fwd, 100, pct);
+    PTORight.spin(fwd, 100, pct);
+  }
 };
 const void Robot::Actions::outtake() {
   Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
@@ -114,6 +146,10 @@ const void Robot::Drivetrain::right(const float pct) {
   for (auto i = motors.begin(); i != motors.end(); ++i)
     i->spin(fwd, pct, percent);
 };
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Vision Sensor Roller Start
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 namespace roller {
 
 enum class ROLLER : int { RED, BLUE, IN_BETWEEN } ROLLER;
@@ -153,7 +189,8 @@ void RollerArea::update() {
   blueC = {static_cast<double>(blueObj.centerX),
            static_cast<double>(blueObj.centerY)};
 
-  printf("updating\n");
+  printf("updating: \n r(%f,%f) \nr.%d \n b(%f,%f) \nb.%d", redC.x, redC.y, red,
+         blueC.x, blueC.y, blue);
 };
 
 enum ROLLER whatIsRoller() {
@@ -175,6 +212,8 @@ void visionAidedRoller() {
   PTOLeft.spin(fwd, 25, pct);
   PTORight.spin(fwd, 25, pct);
   while (!(whatIsRoller() == Robot::team)) {
+    if (Controller1.ButtonY.pressing())
+      break;
     printf("%f", whatIsRoller());
     printf("vision roller\n");
     wait(10, msec);
@@ -189,3 +228,6 @@ void visionAidedRoller() {
 
 } // namespace roller
 const void Robot::Actions::roller() { roller::visionAidedRoller(); };
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Vision Sensor Roller End
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

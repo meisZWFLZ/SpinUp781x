@@ -24,7 +24,7 @@ encoder VertEncoder = encoder(Brain.ThreeWirePort.C);
 inertial Inertial10 = inertial(PORT1);
 /*vex-vision-config:begin*/
 signature VisionSensor__RED_ROLLER = signature (1, 7467, 9637, 8552, -1203, 115, -544, 5, 0);
-signature VisionSensor__BLUE_ROLLER = signature (2, -3591, -2439, -3015, 7859, 13779, 10819, 1.3, 0);
+signature VisionSensor__BLUE_ROLLER = signature (2, -3591, -2439, -3015, 7859, 13779, 10819, 4, 0);
 vision VisionSensor = vision (PORT12, 50, VisionSensor__RED_ROLLER, VisionSensor__BLUE_ROLLER);
 /*vex-vision-config:end*/
 motor Catapult1MotorA = motor(PORT13, ratio36_1, false);
