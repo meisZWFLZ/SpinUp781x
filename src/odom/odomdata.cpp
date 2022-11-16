@@ -54,10 +54,13 @@ const double OdomData::getEncoder(const Robot::Encoders::ENCODER enc) const {
 };
 const double
 OdomData::getEncoderInches(const Robot::Encoders::ENCODER enc) const {
-  return Robot::Encoders::encoders[enc].type ==
-                 Robot::Encoders::EncOrMotor::ENCODER_TYPE::ENCODER
-             ? Conversions::EncoderRadians::toInches(getEncoder(enc))
-             : Conversions::MotorRadians::toInches(getEncoder(enc));
+  switch (enc) {
+  case Robot::Encoders::ENCODER::BACK:
+    return getEncoder(enc) * Robot::Dimensions::encoderWheelRadius;
+  default:
+    return getEncoder(enc) * Robot::Dimensions::driveWheelRadius *
+           Robot::Dimensions::driveGearRatio;
+  };
 };
 const Position OdomData::getPosition() const {
   // printf("x: %f\n", curr.pos.x);
@@ -100,11 +103,13 @@ OdomData::DeltaData::getEncoder(const Robot::Encoders::ENCODER enc) const {
 
 const double OdomData::DeltaData::getEncoderInches(
     const Robot::Encoders::ENCODER enc) const {
-  // printf("++last: ,curr");
-  return Robot::Encoders::encoders[enc].type ==
-                 Robot::Encoders::EncOrMotor::ENCODER_TYPE::ENCODER
-             ? Conversions::EncoderRadians::toInches(getEncoder(enc))
-             : Conversions::MotorRadians::toInches(getEncoder(enc));
+  switch (enc) {
+  case Robot::Encoders::ENCODER::BACK:
+    return getEncoder(enc) * Robot::Dimensions::encoderWheelRadius;
+  default:
+    return getEncoder(enc) * Robot::Dimensions::driveWheelRadius *
+           Robot::Dimensions::driveGearRatio;
+  };
 };
 
 const Position OdomData::DeltaData::getPosition() const {

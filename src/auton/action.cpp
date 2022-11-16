@@ -6,8 +6,8 @@ void auton::StopIntake::execute() const { Robot::Actions::stopIntake(); };
 void auton::Expand::execute() const { Robot::Actions::expand(); };
 void auton::Shoot::execute() const { Robot::Actions::shoot(goal); };
 auton::Shoot::Shoot(const Robot::GOAL goal) : goal(goal){};
-void auton::PTO::execute() const { Robot::Actions::pto(state); };
-auton::PTO::PTO(const Robot::PTO_STATE state) : state(state){};
+// void auton::PTO::execute() const { Robot::Actions::pto(state); };
+// auton::PTO::PTO(const Robot::PTO_STATE state) : state(state){};
 constexpr float pi2 = 2 * M_PI;
 inline constexpr float headingDifference(float a, float b) {
   const float diff = a - b;

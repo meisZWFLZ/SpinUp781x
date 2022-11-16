@@ -32,14 +32,14 @@ public:
   Shoot(const Robot::GOAL goal);
   void execute() const override;
 };
-class PTO : public Action {
-private:
-  const Robot::PTO_STATE state;
+// class PTO : public Action {
+// private:
+//   const Robot::PTO_STATE state;
 
-public:
-  PTO(const Robot::PTO_STATE state);
-  void execute() const override;
-};
+// public:
+//   PTO(const Robot::PTO_STATE state);
+//   void execute() const override;
+// };
 class GoTo : public Action {
 private:
   const Position pos;

@@ -25,17 +25,17 @@ inline constexpr const double toRadians(const double encoderInches) {
   return encoderInches / (Robot::Dimensions::encoderWheelRadius);
 };
 } // namespace EncoderInches
-namespace MotorRadians {
-inline constexpr const double toInches(const double motorRadians) {
-  return motorRadians * Robot::Dimensions::driveWheelRadius *
-         Robot::Dimensions::driveGearRatio;
-};
-} // namespace MotorRadians
-namespace MotorInches {
-inline constexpr const double toRadians(const double motorInches) {
-  return motorInches / (Robot::Dimensions::driveWheelRadius *
-                        Robot::Dimensions::driveGearRatio);
-};
-} // namespace MotorInches
+// namespace MotorRadians {
+// inline constexpr const double toInches(const double motorRadians) {
+//   return motorRadians * Robot::Dimensions::driveWheelRadius *
+//          Robot::Dimensions::driveGearRatio;
+// };
+// } // namespace MotorRadians
+// namespace MotorInches {
+// inline constexpr const double toRadians(const double motorInches) {
+//   return motorInches / (Robot::Dimensions::driveWheelRadius *
+//                         Robot::Dimensions::driveGearRatio);
+// };
+// } // namespace MotorInches
 } // namespace Conversions
 #endif
