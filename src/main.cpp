@@ -1,142 +1,11 @@
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// PTOLeft              motor         2
-// PTORight             motor         3
-// PTOPiston            digital_out   H
-// LeftDriveA           motor         4
-// LeftDriveB           motor         5
-// RightDriveA          motor         6
-// RightDriveB          motor         11
-// FlyWheel             motor_group   8, 9
-// HoriEncoder          encoder       A, B
-// VertEncoder          encoder       C, D
-// Inertial10           inertial      1
-// VisionSensor         vision        12
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// PTOLeft              motor         2
-// PTORight             motor         3
-// PTOPiston            digital_out   H
-// LeftDriveA           motor         4
-// LeftDriveB           motor         5
-// RightDriveA          motor         6
-// RightDriveB          motor         11
-// FlyWheel             motor_group   8, 9
-// HoriEncoder          encoder       A, B
-// VertEncoder          encoder       C, D
-// Inertial10           inertial      1
-// VisionSensor         vision        12
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// PTOLeft              motor         2
-// PTORight             motor         3
-// PTOPiston            digital_out   H
-// LeftDriveA           motor         4
-// LeftDriveB           motor         5
-// RightDriveA          motor         6
-// RightDriveB          motor         11
-// FlyWheel             motor_group   8, 9
-// HoriEncoder          encoder       A, B
-// VertEncoder          encoder       C, D
-// Inertial10           inertial      1
-// VisionSense          vision        12
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// PTOLeft              motor         2
-// PTORight             motor         3
-// PTOPiston            digital_out   H
-// LeftDriveA           motor         4
-// LeftDriveB           motor         5
-// RightDriveA          motor         6
-// RightDriveB          motor         11
-// FlyWheel             motor_group   8, 9
-// HoriEncoder          encoder       A, B
-// VertEncoder          encoder       C, D
-// Inertial10           inertial      1
-// VisionSense          vision        12
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// PTOLeft              motor         2
-// PTORight             motor         3
-// PTOPiston            digital_out   H
-// LeftDriveA           motor         4
-// LeftDriveB           motor         5
-// RightDriveA          motor         6
-// RightDriveB          motor         11
-// FlyWheel             motor_group   8, 9
-// HoriEncoder          encoder       A, B
-// VertEncoder          encoder       C, D
-// Inertial10           inertial      1
-// VisionSense          vision        12
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// PTOLeft              motor         2
-// PTORight             motor         3
-// PTOPiston            digital_out   H
-// LeftDriveA           motor         4
-// LeftDriveB           motor         5
-// RightDriveA          motor         6
-// RightDriveB          motor         11
-// FlyWheel             motor_group   8, 9
-// HoriEncoder          encoder       A, B
-// VertEncoder          encoder       C, D
-// Inertial10           inertial      1
-// Vision12             vision        12
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// PTOLeft              motor         2
-// PTORight             motor         3
-// PTOPiston            digital_out   H
-// LeftDriveA           motor         4
-// LeftDriveB           motor         5
-// RightDriveA          motor         6
-// RightDriveB          motor         11
-// FlyWheel             motor_group   8, 9
-// HoriEncoder          encoder       A, B
-// VertEncoder          encoder       C, D
-// Inertial10           inertial      1
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// PTOLeft              motor         2
-// PTORight             motor         3
-// PTOPiston            digital_out   H
-// LeftDriveA           motor         4
-// LeftDriveB           motor         5
-// RightDriveA          motor         6
-// RightDriveB          motor         11
-// FlyWheel             motor_group   8, 9
-// HoriEncoder          encoder       A, B
-// VertEncoder          encoder       C, D
-// Inertial10           inertial      1
-// ---- END VEXCODE CONFIGURED DEVICES ----
-
+#include "auton/elements.h"
+#include "conversions.h"
 #include "odom/tracking.h"
+#include "pid_controller.h"
 #include "position.h"
 #include "vex.h"
 #include <atomic>
+#include <auton/action.h>
 #include <cmath>
 #include <iostream>
 #include <thread>
@@ -155,7 +24,7 @@
 - distance in inches
 */
 
-// const Position GOAL_POS = {0, 0, 0};
+const Position GOAL_POS = {18, 18, 0};
 
 // enum Button {
 //   CANCEL_SHOOTING,
@@ -290,7 +159,7 @@ int axisPosition(Axis axis) { return getControllerAxis(axis).position(); }
 //     aimTurret(Position::distance(pos, GOAL_POS));
 
 //   // shooting
-//   for (int i = 0; i < 3 && !cancelShooting && i < shots; i++) {
+//   for (int i = 0; i < 3 && !cancelShooting && i < shots; i++) {l
 //     loadDisc();
 
 //     // wait for delay to repeat
@@ -345,298 +214,630 @@ int axisPosition(Axis axis) { return getControllerAxis(axis).position(); }
 // void subscribeAxisListener(Axis axis, void (*callback)()) {
 //   getControllerAxis(axis).changed(callback);
 // }
-static atomic<bool> PTOState = {true}; // false = drivetrain, true = intake
-
 enum PTO { DRIVE, INTAKE };
-enum class TEAM { RED, BLUE } TEAM;
-enum class ROLLER { RED, BLUE, IN_BETWEEN } ROLLER;
 
-void flyWheelButtonSubscriber() {
-  flyWheelSpin = !flyWheelSpin;
-  if (flyWheelSpin)
-    FlyWheel.spin(fwd, 10, volt);
-  else
-    FlyWheel.stop();
-}
+static atomic<bool> PTOState = {INTAKE}; // false = drivetrain, true = intake
 
-void spinLeftDrive(directionType dir, double velocity, percentUnits units) {
-  std::vector<motor> motors;
-  if (PTOState == PTO::INTAKE)
-    motors = {LeftDriveA, LeftDriveB}; // intake
-  else
-    motors = {LeftDriveA, LeftDriveB, PTOLeft}; // drivetrain
-  for (auto i = motors.begin(); i != motors.end(); ++i)
-    i->spin(dir, velocity, units);
+// enum class TEAM : bool { RED, BLUE } TEAM;
+// enum TEAM team;
+enum class ROLLER : int { RED, BLUE, IN_BETWEEN } ROLLER;
+
+static const bool operator==(const enum Robot::TEAM team1,
+                             const enum ROLLER roller1) {
+  return (int)team1 == (int)roller1;
+};
+static const bool operator==(const enum ROLLER roller1,
+                             const enum Robot::TEAM team1) {
+  return (int)team1 == (int)roller1;
 };
 
-void spinRightDrive(directionType dir, double velocity, percentUnits units) {
-  std::vector<motor> motors;
-  if (PTOState == PTO::INTAKE)
-    motors = {RightDriveA, RightDriveB}; // intake
-  else
-    motors = {RightDriveA, RightDriveB, PTORight}; // drivetrain
-  for (auto i = motors.begin(); i != motors.end(); ++i)
-    i->spin(dir, velocity, units);
-}
+// void flyWheelButtonSubscriber() {
+//   flyWheelSpin = !flyWheelSpin;
+//   if (flyWheelSpin)
+//     FlyWheel.spin(fwd, 10, volt);
+//   else
+//     FlyWheel.stop();
+// }
+
+// void spinLeftDrive(directionType dir, double velocity, percentUnits units) {
+//   std::vector<motor> motors;
+//   if (PTOState == PTO::INTAKE)
+//     motors = {LeftDriveA, LeftDriveB}; // intake
+//   else
+//     motors = {LeftDriveA, LeftDriveB, PTOLeft}; // drivetrain
+//   for (auto i = motors.begin(); i != motors.end(); ++i)
+//     i->spin(dir, velocity, units);
+// };
+
+// void spinRightDrive(directionType dir, double velocity, percentUnits units) {
+//   std::vector<motor> motors;
+//   if (PTOState == PTO::INTAKE)
+//     motors = {RightDriveA, RightDriveB}; // intake
+//   else
+//     motors = {RightDriveA, RightDriveB, PTORight}; // drivetrain
+//   for (auto i = motors.begin(); i != motors.end(); ++i)
+//     i->spin(dir, velocity, units);
+// }
 
 void leftDriveSubscriber() {
-  spinLeftDrive(fwd, pow((float)axisPosition(LEFT_DRIVE) / 100, 3) * 100, pct);
+  // spinLeftDrive(fwd, pow((float)axisPosition(LEFT_DRIVE) / 100, 5) * 100,
+  // pct);
+  Robot::Drivetrain::left(pow((float)axisPosition(LEFT_DRIVE) / 100, 5));
 }
 
 void rightDriveSubscriber() {
-  spinRightDrive(fwd, pow((float)axisPosition(RIGHT_DRIVE) / 100, 3) * 100,
-                 pct);
+  // spinRightDrive(fwd, pow((float)axisPosition(RIGHT_DRIVE) / 100, 5) * 100,
+  //                pct);
+  Robot::Drivetrain::right(pow((float)axisPosition(RIGHT_DRIVE) / 100, 5));
 }
 
-void PTOToggle() {
-  PTOState = !PTOState;
-  PTOPiston.set(PTOState);
-  printf("pto switch to %d\n", PTOState.load());
-}
-void PTOSetTo(bool setTo) {
-  if (PTOState != setTo)
-    PTOToggle();
-};
+// struct RollerArea {
+// public:
+//   int red;
+//   int blue;
+//   void update();
+//   RollerArea();
+// };
 
-struct RollerArea {
-public:
-  int red;
-  int blue;
-  void update();
-  RollerArea();
-};
+// atomic<bool> spinningRoller = {false};
+// RollerArea rollArea = {};
 
-atomic<bool> spinningRoller = {false};
-RollerArea rollArea = {};
+// RollerArea::RollerArea() : red(0), blue(0) {}
+// void RollerArea::update() {
+//   // VisionSensor.takeSnapshot(VisionSensor__RED_ROLLER);
+//   // vision::object redObj = VisionSensor.largestObject;
+//   // red = redObj.width * redObj.height;
+//   // VisionSensor.takeSnapshot(VisionSensor__BLUE_ROLLER);
+//   // vision::object blueObj = VisionSensor.largestObject;
+//   // blue = blueObj.width * blueObj.height;
+//   // printf("updating\n");
+// };
 
-RollerArea::RollerArea() : red(0), blue(0) {}
-void RollerArea::update() {
-  VisionSensor.takeSnapshot(VisionSensor__RED_ROLLER);
-  vision::object redObj = VisionSensor.largestObject;
-  red = redObj.width * redObj.height;
-  VisionSensor.takeSnapshot(VisionSensor__BLUE_ROLLER);
-  vision::object blueObj = VisionSensor.largestObject;
-  blue = blueObj.width * blueObj.height;
-};
+// enum ROLLER whatIsRoller() {
+//   rollArea.update();
+//   if (rollArea.red > 1000 && rollArea.red > rollArea.blue * 5)
+//     return ROLLER::RED;
+//   if (rollArea.blue > 1000 && rollArea.blue > rollArea.red * 5)
+//     return ROLLER::BLUE;
+//   return ROLLER::IN_BETWEEN;
+// };
 
-enum ROLLER whatIsRoller() {
-  rollArea.update();
-  if (rollArea.red > 1000 && rollArea.red > rollArea.blue * 5)
-    return ROLLER::RED;
-  if (rollArea.blue > 1000 && rollArea.blue > rollArea.red * 5)
-    return ROLLER::BLUE;
-  return ROLLER::IN_BETWEEN;
-};
+// void visionAidedRoller() {
+//   if (whatIsRoller() == Robot::team)
+//     return;
+//   // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
+//   spinningRoller = true;
+//   Intake.spin(fwd, 25, pct);
+//   while (!(whatIsRoller() == Robot::team)) {
+//     printf("vision roller\n");
+//     wait(20, msec);
+//   }
+//   spinningRoller = false;
+//   Intake.stop();
+// };
 
-void visionAidedRoller() {
-  if (whatIsRoller() == ROLLER::BLUE)
-    return;
-  PTOSetTo(PTO::INTAKE);
-  spinningRoller = true;
-  PTOLeft.spin(fwd, 25, pct);
-  PTORight.spin(fwd, 25, pct);
-  while (whatIsRoller() != ROLLER::BLUE) {
+// bool readyToShoot = true;
 
-    printf("vision roller\n");
-    wait(20, msec);
-  }
-  spinningRoller = false;
-  PTOLeft.stop();
-  PTORight.stop();
-};
-struct NEW_PRESS {
-  static atomic<bool> R1;
-  static atomic<bool> L1;
-  static atomic<bool> R2;
-  static atomic<bool> L2;
-};
-atomic<bool> NEW_PRESS::R1 = {false};
-atomic<bool> NEW_PRESS::L1 = {false};
-atomic<bool> NEW_PRESS::R2 = {false};
-atomic<bool> NEW_PRESS::L2 = {false};
+void shootListener() { Robot::Actions::shoot((Robot::GOAL)(int)Robot::team); }
 
-atomic<bool> PTOWasSwitched = {false};
+// struct NEW_PRESS {
+//   static atomic<bool> R1;
+//   static atomic<bool> L1;
+//   static atomic<bool> R2;
+//   static atomic<bool> L2;
+// };
+// atomic<bool> NEW_PRESS::R1 = {false};
+// atomic<bool> NEW_PRESS::L1 = {false};
+// atomic<bool> NEW_PRESS::R2 = {false};
+// atomic<bool> NEW_PRESS::L2 = {false};
 
-void shiftKeyStuff() {
-  while (1) {
-    if (NEW_PRESS::R1)
-      if (NEW_PRESS::L1) {
-        // pto switch
-        PTOToggle();
-        PTOWasSwitched = true;
-      } else {
-        PTOSetTo(PTO::INTAKE);
-        PTOLeft.spin(fwd, 100, pct);
-        PTORight.spin(fwd, 100, pct);
-        printf("intake in\n");
-      }
-    else if (NEW_PRESS::L1)
-      printf("shoot\n");
-    if (!spinningRoller)
-      rollArea.update();
-    printf("red: %d, blue: %d\n", rollArea.red, rollArea.blue);
-    if ((rollArea.red + rollArea.blue) > 30000)
-      visionAidedRoller();
-    wait(200, msec);
-  }
-}
+// atomic<bool> PTOWasSwitched = {false};
+
+// void shiftKeyStuff() {
+//   while (1) {
+//     if (NEW_PRESS::R1)
+//       if (NEW_PRESS::L1) {
+//         // pto switch
+//         // Robot::Actions::pto((Robot::PTO_STATE)(!((bool)Robot::PTOState)));
+//         // PTOWasSwitched = true;
+//       } else {
+//         Robot::Actions::intake();
+//         printf("intake in\n");
+//       }
+//     else if (NEW_PRESS::L1) {
+//       Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
+//       // printf("shoot\n");
+//       // shootListener();
+//     }
+
+//     // if (!spinningRoller)
+//     //   rollArea.update();
+//     // printf("red: %d, blue: %d\n", rollArea.red, rollArea.blue);
+//     // if ((rollArea.red + rollArea.blue) > 30000)
+//     //   visionAidedRoller();
+//     wait(100, msec);
+//   }
+// }
 
 void controllerDisplay(OdomTracking);
 
 void motorSetup() {
-  // FlyWheel.setBrake(coast);
+  // FlyWheel.setStopping(coast);
+  ExpansionPiston.set(false);
 
-  PTOPiston.set(true);
+  Catapult1.setStopping(coast);
+
+  Robot::Drivetrain::Left = new motor_group(LeftDriveA, LeftDriveB, LeftDriveC);
+  Robot::Drivetrain::Right =
+      new motor_group(RightDriveA, RightDriveB, RightDriveC);
+  Robot::Drivetrain::Left->setStopping(coast);
+  Robot::Drivetrain::Right->setStopping(coast);
+  RollerSensor.setLightPower(100, pct);
+
+  // PTOPiston.set(false);
 }
 
-void tracking() {
-  OdomTracking tracker1 = {{0, 0, 0}};
-  tracker = &tracker1;
+// void tracking() {
+//   OdomTracking tracker1 = {{0, 0, 0}};
+//   tracker = &tracker1;
+// }
+
+// const float pidLimit = 50; // pct
+
+// float leftAdjustment = 0;
+// float rightAdjustment = 0;
+
+// void spinLeftPID(const float velocityPercent) {
+//   leftAdjustment += velocityPercent;
+// };
+
+// void spinRightPID(const float velocityPercent) {
+//   rightAdjustment += velocityPercent;
+// };
+
+// void spinBothPID(const float velocityPercent) {
+//   spinRightPID(velocityPercent);
+//   spinLeftPID(velocityPercent);
+//   // if (abs(velocityPercent) < pidLimit) {
+//   //   spinRightDrive(fwd, velocityPercent, pct);
+//   //   spinLeftDrive(fwd, velocityPercent, pct);
+//   // } else {
+//   //   printf("both at limit: %f\n", velocityPercent);
+//   //   spinRightDrive(fwd, velocityPercent > 0 ? pidLimit : -pidLimit, pct);
+//   //   spinLeftDrive(fwd, velocityPercent > 0 ? pidLimit : -pidLimit, pct);
+//   // }
+// };
+
+// void spinPID() {
+//   if (abs(leftAdjustment) < pidLimit)
+//     spinLeftDrive(fwd, leftAdjustment, pct);
+//   else {
+//     printf("left at limit: %f\n", leftAdjustment);
+//     spinLeftDrive(fwd, leftAdjustment > 0 ? pidLimit : -pidLimit, pct);
+//   }
+//   if (abs(rightAdjustment) < pidLimit)
+//     spinRightDrive(fwd, rightAdjustment, pct);
+//   else {
+//     printf("right at limit: %f\n", rightAdjustment);
+//     spinRightDrive(fwd, rightAdjustment > 0 ? pidLimit : -pidLimit, pct);
+//   }
+//   leftAdjustment = 0;
+//   rightAdjustment = 0;
+// };
+
+// float getLeftPID() {
+//   return (LeftDriveA.position(degrees) + LeftDriveB.position(degrees)) / 2;
+// };
+
+// float getRightPID() {
+//   return (RightDriveA.position(degrees) + RightDriveB.position(degrees)) / 2;
+// };
+
+// float getBothPID() { return (getRightPID() + getLeftPID()) / 2; };
+
+// void pid() {
+//   spinLeftPID(10);
+//   const float kP = 0.5;
+//   float error = 0;
+//   float proportional = 0;
+//   while (1) {
+//     error = getLeftPID() - getRightPID();
+//     proportional = error * kP;
+//     spinRightPID(10 + proportional);
+//     printf("error: %f, pro: %f\n", error, proportional);
+//     wait(20, msec);
+//   }
+// }
+
+static constexpr float pi2 = 2 * M_PI;
+constexpr float headingDifference(float a, float b) {
+  const float diff = a - b;
+  return (diff +
+          pi2 * (diff > 0 ? (diff > M_PI ? -1 : 0) : diff < -M_PI ? 1 : 0));
 }
+// PIDController::Callback *stopPID;
+// PIDController::Callback *turnPID;
+// float target = 0;
 
-int main() {
-  vexcodeInit();
-  // R1 -> intake in
-  // R2 -> intake out
-  // L1 -> shoot
-  // R1 L1 -> pto switch
-  // R2 L2 -> flywheel toggle
-  // L2 -> roller
+class AutonSelection {
+public:
+  static std::vector<std::function<void(void)>> autonArr;
+  static int autonPos;
+  static void print() {
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFont(monoXXL);
+    Brain.Screen.setFillColor(transparent);
+    Brain.Screen.setCursor(1, 1);
+    Brain.Screen.print(autonPos);
+    Brain.Screen.setFillColor(Robot::TEAM::RED == Robot::team ? red : blue);
+    Brain.Screen.drawRectangle(240, 0, 480, 240);
+  }
+  static void listener() {
+    if (Brain.Screen.xPosition() < 240) {
+      // auton
+      autonPos = (autonPos + 1) % autonArr.size();
+    } else {
+      // team
+      Robot::team = Robot::TEAM::RED == Robot::team ? Robot::TEAM::BLUE
+                                                    : Robot::TEAM::RED;
+    }
+    print();
+  }
+  static const void
+  start(const std::vector<std::function<void(void)>> autonArr1) {
+    autonArr = autonArr1;
+    Brain.Screen.setFont(monoXXL);
+    Brain.Screen.pressed(AutonSelection::listener);
+    print();
+  };
+  static void run() {
+    Brain.Screen.setFont(monoL);
+    Brain.Screen.setFillColor(transparent);
+    autonArr[autonPos]();
+  };
+};
+std::vector<std::function<void(void)>> AutonSelection::autonArr = {};
+int AutonSelection::autonPos = 0;
 
-  // shoot pressed
-  Controller1.ButtonL1.pressed([]() {
-    NEW_PRESS::L1 = true;
-    wait(200, msec);
-    NEW_PRESS::L1 = false;
-  });
-  // intake pressed
-  Controller1.ButtonR1.pressed([]() {
-    NEW_PRESS::R1 = true;
-    wait(200, msec);
-    NEW_PRESS::R1 = false;
-  });
-  // intake released
-  Controller1.ButtonR1.released([]() {
-    if (!PTOWasSwitched) {
-      PTOLeft.stop();
-      PTORight.stop();
-      printf("intake stopped\n");
-    } else
-      PTOWasSwitched = false;
-  });
-  // outtake pressed
-  Controller1.ButtonR2.pressed([]() {
-    // NEW_PRESS::R2 = true;
-    // wait(200, msec);
-    // NEW_PRESS::R2 = false;
-    PTOSetTo(PTO::INTAKE);
-    PTOLeft.spin(reverse, 100, pct);
-    PTORight.spin(reverse, 100, pct);
-    printf("intake in\n");
-  });
-  // outtake released
-  Controller1.ButtonR2.released([]() {
-    PTOLeft.stop();
-    PTORight.stop();
-    printf("intake stopped\n");
-  });
-
-  Controller1.ButtonL2
-      .pressed(&visionAidedRoller /* []() {
-NEW_PRESS::L2 = true;
-wait(200, msec);
-NEW_PRESS::L2 = false;
-} */);
-
-  // flywheel
-  Controller1.ButtonUp.pressed(&flyWheelButtonSubscriber);
-  // temp testing flywheel
-  Brain.Screen.pressed(&flyWheelButtonSubscriber);
-
+// void autonSelection(const std::vector<std::function<void(void)>> autonArr1) {
+//   static int autoPos = 0;
+//   static const std::vector<std::function<void(void)>> autonArr = autonArr1;
+// }
+competition Competition;
+void autonomous() {
+  Robot::Drivetrain::left(10);
+  Robot::Drivetrain::right(10);
+  wait(250, msec);
+  AutonSelection::run();
+  // Robot::Actions::outtake();
+  // Robot::Drivetrain::left(-10);
+  // Robot::Drivetrain::right(-10);
+  wait(250, msec);
+  // Robot::Actions::stopIntake();
+  Robot::Drivetrain::left(0);
+  Robot::Drivetrain::right(0);
+  // Robot::Drivetrain::left(30);
+  // Robot::Drivetrain::right(30);
+  // wait(750, msec);
+  // // AutonSelection::run();
+  // Robot::Actions::outtake();
+  // Robot::Drivetrain::left(-15);
+  // Robot::Drivetrain::right(-15);
+  // wait(750, msec);
+  // Robot::Actions::stopIntake();
+  // Robot::Drivetrain::left(0);
+  // Robot::Drivetrain::right(0);
+};
+void driverControl() {
+  thread([] { controllerDisplay({{}}); });
+  // drive code
   Controller1.Axis2.changed(&rightDriveSubscriber);
   Controller1.Axis3.changed(&leftDriveSubscriber);
 
-  // start shiftKeyNonsense
-  thread Thread;
-  (thread(shiftKeyStuff));
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    START CATA TEST
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+  Controller1.ButtonUp.pressed([]() {
+    Catapult1.spin(fwd, 100, pct);
+    while (Controller1.ButtonUp.pressing()) {
+      wait(10, msec);
+    }
+    Catapult1.stop();
+  });
+  Controller1.ButtonDown.pressed([]() {
+    Catapult1.spin(reverse, 100, pct);
+    while (Controller1.ButtonDown.pressing()) {
+      wait(10, msec);
+    }
+    Catapult1.stop();
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    END CATA TEST
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  // R1 -> intake in (toggle)
+  // R2 -> intake out
+  // L1 -> shoot
+  // R2 L2 -> flywheel toggle
+  // L2 -> roller
+  // a b -> expansion
+
+  // shoot pressed
+  Controller1.ButtonL1.pressed(shootListener);
+  // intake pressed
+  Controller1.ButtonR1.pressed([]() {
+    static bool intaking = false;
+    // printf("neil\n");
+    intaking = !intaking;
+    if (intaking)
+      Robot::Actions::stopIntake();
+    else
+      Robot::Actions::intake();
+  });
+  // outtake pressed
+  Controller1.ButtonR2.pressed([]() {
+    static bool outtaking = false;
+    outtaking = !outtaking;
+    if (outtaking)
+      Robot::Actions::stopIntake();
+    else
+      Robot::Actions::outtake();
+  });
+
+  Controller1.ButtonL2.pressed([] { Robot::Actions::roller(); });
+
+  // flywheel
+  // Controller1.ButtonUp.pressed(&flyWheelButtonSubscriber);
+  // temp testing flywheel
+  // Brain.Screen.pressed(&flyWheelButtonSubscriber);
+
+  // expansion
+  Controller1.ButtonA.pressed([] {
+    if (Controller1.ButtonB.pressing())
+      Robot::Actions::expand();
+  });
+  Controller1.ButtonB.pressed([] {
+    if (Controller1.ButtonA.pressing())
+      Robot::Actions::expand();
+  });
+
+  // Controller1.ButtonX.pressed([])
+
+  // start shiftKeyNonsense
+  // thread Thread;
+  // (thread(shiftKeyStuff));
+
+  // Controller1.ButtonA.pressed([]() {
+  //   while (abs(tracker1->getRobotPosition().heading - M_PI) > 0.01)
+  //     printf("%f\n", tracker1->getRobotPosition().heading);
+  // });
+
+  // ANYTHING AFTER THIS FUNCTION WILL NOT BE EXECUTED
+  // controllerDisplay({{}});
+}
+void preAuton() {
+  // using namespace auton;
+  AutonSelection::start({[] {
+                           //  Path({new Roller()}).execute();
+                           //  tracker->reset(Robot::team == Robot::TEAM::RED
+                           //                     ? elements::ROLLER::BLUE_LEFT
+                           //                     : elements::ROLLER::RED_LEFT);
+                           Intake.setPosition(0, deg);
+                           Intake.spin(fwd, -100, pct);
+                           //  int lastPos
+                           while (Intake.position(turns) < 2)
+                             wait(10, msec);
+                           Intake.stop();
+                         },
+                         [] {
+                           //  tracker->reset({60, 60, 0});
+                         }});
+}
+int main() {
+  vexcodeInit();
+  // return 1;
   motorSetup();
 
-  // subscribeButtonListener(Button::SHOOT, &shootButtonSubscriber);
-  // subscribeButtonListener(Button::SAFTEY_SWITCH, &safteySwitchSubscriber);
-  // subscribeButtonListener(Button::CANCEL_SHOOTING,
-  //                         &cancelShootingButtonSubscriber);
-  // subscribeButtonListener(Button::EXPANSION, &expansionButtonSubscriber);
-  // subscribeButtonListener(Button::INTAKE, &intakeButtonSubscriber);
-  // subscribeButtonListener(Button::UNSTUCK_INTAKE,
-  //                         &unstuckIntakeButtonSubscriber);
-  // subscribeButtonListener(Button::PTO_SWITCH, &PTOSwitchSubscriber);
-  // subscribeButtonListener(Button::FLY_WHEEL_TOGGLE,
-  // &flyWheelButtonSubscriber);
+  Robot::team = Robot::TEAM::RED;
 
-  // subscribeReleasedListener(Button::UNSTUCK_INTAKE,
-  //                           &unstuckIntakeReleasedSubscriber);
-  // subscribeReleasedListener(Button::INTAKE, &intakeReleasedSubscriber);
+  OdomTracking tracker1 = {{}};
+  tracker = &tracker1;
 
-  // subscribeAxisListener(Axis::LEFT_DRIVE, &leftDriveSubscriber);
-  // subscribeAxisListener(Axis::RIGHT_DRIVE, &rightDriveSubscriber);
+  tracker->reset({35, 135, 0});
+  Inertial10.calibrate(2);
+  // wait until inertial finsished calibrating
+  while (Inertial10.isCalibrating())
+    wait(20, msec);
 
-  // start tracking
-  // thread Thread;
-  // (thread(tracking));
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    START COMPETITION
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  controllerDisplay({{}});
+  // Competition.autonomous(autonomous);
+  // Competition.drivercontrol(driverControl);
+  preAuton();
+  driverControl();
+  while (1) {
+    wait(100, msec);
+  }
+  return 1;
+
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    END COMPETITION
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  // drivetrain code
+  Controller1.Axis2.changed(&rightDriveSubscriber);
+  Controller1.Axis3.changed(&leftDriveSubscriber);
+
+  // odometry
+
+  // team
+
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    START CATA TEST
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  // Catapult1.setVelocity(100, percent);
+
+  Controller1.ButtonUp.pressed([]() {
+    Catapult1.spin(fwd, 100, pct);
+    while (Controller1.ButtonUp.pressing()) {
+      wait(10, msec);
+    }
+    Catapult1.stop();
+  });
+  Controller1.ButtonDown.pressed([]() {
+    Catapult1.spin(reverse, 100, pct);
+    while (Controller1.ButtonDown.pressing()) {
+      wait(10, msec);
+    }
+    Catapult1.stop();
+  });
+
+  // return 1;
+
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    END CATA TEST
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    START AUTON TESTING
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  // auto x = []() {
+  //   using namespace auton;
+  //   Path({
+  //            new GoTo(Robot::team == Robot::TEAM::BLUE
+  //                         ? elements::ROLLER::BLUE_LEFT
+  //                         : elements::ROLLER::RED_LEFT),
+  //            //  new Roller(),
+  //            new GoTo(Robot::team == Robot::TEAM::BLUE
+  //                         ? elements::ROLLER::BLUE_RIGHT
+  //                         : elements::ROLLER::RED_RIGHT),
+  //            //  new Roller(),
+  //            //  new GoTo(Robot::team == Robot::TEAM::BLUE
+  //            //               ? elements::ROLLER::BLUE_LEFT
+  //            //               : elements::ROLLER::RED_LEFT),
+  //        })
+  //       .execute();
+  // };
+  // tracker->reset(elements::ROLLER::LEFT);
+  // Controller1.ButtonX.pressed([]() {
+  //   []() {
+
+  // });
+  // (thread([]() {
+  //   Position robotPos1;
+
+  //   while (1) {
+  //     Controller1.Screen.setCursor(0, 0);
+
+  //     robotPos1 = tracker->getRobotPosition();
+  //     Controller1.Screen.clearLine();
+  //     Controller1.Screen.print("(");
+  //     Controller1.Screen.print(robotPos1.x);
+  //     Controller1.Screen.print(",");
+  //     Controller1.Screen.print(robotPos1.y);
+  //     Controller1.Screen.print(",");
+  //     Controller1.Screen.print(robotPos1.heading);
+  //     Controller1.Screen.print(")");
+  //     Controller1.Screen.newLine();
+  //     wait(20, msec);
+
+  //     Brain.Screen.clearLine();
+  //     Brain.Screen.print("(");
+  //     Brain.Screen.print(robotPos1.x);
+  //     Brain.Screen.print(",");
+  //     Brain.Screen.print(robotPos1.y);
+  //     Brain.Screen.print(",");
+  //     Brain.Screen.print(robotPos1.heading);
+  //     Brain.Screen.print(")");
+  //     Brain.Screen.newLine();
+  //     wait(20, msec);
+  //   }
+  // }));
+  // Controller1.ButtonX.pressed([]() {
+  //   auton::GoTo goTo = {{}};
+  //   goTo.execute();
+  // });
+
+  // return 1;
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //    END AUTON TESTING
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
 
-void controllerDisplay(OdomTracking tracker) {
-  {
-    Position robotPos1;
-    while (1) {
-      // reset
-      Controller1.Screen.setCursor(0, 0);
+void controllerDisplay(OdomTracking tracker1) {
+  Brain.Screen.clearScreen();
+  // tracker = &tracker1;
+  Position robotPos1;
+  while (1) {
+    // reset
+    Controller1.Screen.setCursor(0, 0);
 
-      // shots
-      // Controller1.Screen.clearLine();
-      // Controller1.Screen.print("shots: ");
-      // Controller1.Screen.print(shots);
-      // Controller1.Screen.newLine();
-      // PTO State
-      Controller1.Screen.clearLine();
-      if (PTOState == PTO::INTAKE)
-        Controller1.Screen.print("intake");
-      else
-        Controller1.Screen.print("drive");
-      Controller1.Screen.newLine();
+    // shots
+    // Controller1.Screen.clearLine();
+    // Controller1.Screen.print("shots: ");
+    // Controller1.Screen.print(shots);
+    // Controller1.Screen.newLine();
+    // PTO State
+    // Controller1.Screen.clearLine();
+    // if (PTOState == PTO::INTAKE)
+    //   Controller1.Screen.print("intake");
+    // else
+    //   Controller1.Screen.print("drive");
+    // Controller1.Screen.newLine();
 
-      // // Deez Nuts
-      // Controller1.Screen.clearLine();
-      // Controller1.Screen.print(/* "deez nuts" */ tracker.deltaPos1.x);
-      // // Controller1.Screen.print(/* "deez nuts" */ tracker.data.curr.pos.x);
+    // // Deez Nuts
+    // Controller1.Screen.clearLine();
+    // Controller1.Screen.print(/* "deez nuts" */ tracker.deltaPos1.x);
+    // // Controller1.Screen.print(/* "deez nuts" */
+    // tracker.data.curr.pos.x);
 
-      // tracking
-      robotPos1 = tracker.getRobotPosition();
-      Brain.Screen.setCursor(1, 1);
-      Brain.Screen.clearLine();
-      Brain.Screen.print("(");
-      Brain.Screen.print(robotPos1.x);
-      Brain.Screen.print(",");
-      Brain.Screen.print(robotPos1.y);
-      Brain.Screen.print(",");
-      Brain.Screen.print(robotPos1.heading);
-      Brain.Screen.print(")");
-      Brain.Screen.newLine();
+    // temp
+    Controller1.Screen.clearLine();
+    Controller1.Screen.print("drive: ");
+    Controller1.Screen.print(
+        (Robot::Drivetrain::Left->temperature(fahrenheit) +
+         Robot::Drivetrain::Right->temperature(fahrenheit)) /
+        2);
+    Controller1.Screen.print(" F");
+    Controller1.Screen.newLine();
 
-      Controller1.Screen.clearLine();
-      Controller1.Screen.print("(");
-      Controller1.Screen.print(robotPos1.x);
-      Controller1.Screen.print(",");
-      Controller1.Screen.print(robotPos1.y);
-      Controller1.Screen.print(",");
-      Controller1.Screen.print(robotPos1.heading);
-      Controller1.Screen.print(")");
-      Controller1.Screen.newLine();
+    Controller1.Screen.clearLine();
+    Controller1.Screen.print("cata: ");
+    Controller1.Screen.print(Catapult1.temperature(fahrenheit));
+    Controller1.Screen.print(" F");
+    Controller1.Screen.newLine();
 
-      wait(50, msec);
-    }
+    // tracking
+    robotPos1 = Robot::getPosition();
+    Brain.Screen.setCursor(1, 1);
+    Brain.Screen.clearLine();
+    Brain.Screen.print("(");
+    Brain.Screen.print(robotPos1.x);
+    Brain.Screen.print(",");
+    Brain.Screen.print(robotPos1.y);
+    Brain.Screen.print(",");
+    Brain.Screen.print(robotPos1.heading);
+    Brain.Screen.print(")");
+    Brain.Screen.newLine();
+
+    Controller1.Screen.clearLine();
+    Controller1.Screen.print("(");
+    Controller1.Screen.print(robotPos1.x);
+    Controller1.Screen.print(",");
+    Controller1.Screen.print(robotPos1.y);
+    Controller1.Screen.print(",");
+    Controller1.Screen.print(robotPos1.heading);
+    Controller1.Screen.print(")");
+    Controller1.Screen.newLine();
+
+    // printf("cata: %f\n", Catapult1.position(degrees));
+
+    wait(50, msec);
   }
 }

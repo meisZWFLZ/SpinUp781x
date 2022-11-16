@@ -2,29 +2,23 @@ using namespace vex;
 
 extern brain Brain;
 
-using signature = vision::signature;
-
 // VEXcode devices
 extern controller Controller1;
-extern motor PTOLeft;
-extern motor PTORight;
-extern digital_out PTOPiston;
+extern inertial Inertial10;
+extern limit CatapultLimitSwitch;
+extern digital_out ExpansionPiston;
 extern motor LeftDriveA;
 extern motor LeftDriveB;
+extern motor LeftDriveC;
 extern motor RightDriveA;
 extern motor RightDriveB;
-extern motor_group FlyWheel;
-extern encoder HoriEncoder;
-extern encoder VertEncoder;
-extern inertial Inertial10;
-extern signature VisionSensor__RED_ROLLER;
-extern signature VisionSensor__BLUE_ROLLER;
-extern signature VisionSensor__SIG_3;
-extern signature VisionSensor__SIG_4;
-extern signature VisionSensor__SIG_5;
-extern signature VisionSensor__SIG_6;
-extern signature VisionSensor__SIG_7;
-extern vision VisionSensor;
+extern motor RightDriveC;
+extern motor Intake;
+extern motor Catapult1;
+extern rotation LeftDriveR;
+extern rotation RightDriveR;
+extern rotation HoriR;
+extern optical RollerSensor;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

@@ -1,16 +1,14 @@
 #ifndef POSITION_H
 #define POSITION_H
+#include "coordinate.h"
 
-class Position {
+class Position : public Coordinate {
 public:
-  double x; // inches
-  double y; // inches
   double heading;
 
   Position(const double x, const double y, const double heading);
+  Position(const Coordinate coord);
   Position();
-
-  static double distance(const Position &pos1, const Position &pos2);
 
   static Position difference(const Position &pos1 /* Minuend  */,
                              const Position &pos2 /* Subtrahend */);
