@@ -40,7 +40,7 @@ public:
   Position findRobotPosition();
 
 public:
-  constexpr static const double WAIT_TIME = 10;
+  constexpr static const double WAIT_TIME = 20;
   void reset(const Position pos);
   // static void
   // trackingLoop(OdomTracking *); // all operations used to find robot position

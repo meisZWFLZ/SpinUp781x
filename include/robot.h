@@ -24,8 +24,7 @@ public:
   class Dimensions {
   public:
     static constexpr float driveWheelRadius = 2.75 / 2;
-    static constexpr double driveGearRatio =
-        2 / 3; // 2 turns of wheel to 3 turns of rotation sensor 
+    static constexpr double driveGearRatio = 3 / 4; // 3 turns of wheel to 4 turns of rotation sensor 
     static constexpr float encoderWheelRadius = 2.75 / 2;
   };
   class Encoders {

@@ -32,6 +32,7 @@ inertial Robot::inertialSensor = Inertial10;
 Robot::Encoders::RotationSensor::RotationSensor(rotation *rotationPtr)
     : rotationPtr(rotationPtr){};
 double Robot::Encoders::RotationSensor::position() {
+  // printf("nail: %f\n", rotationPtr->position(deg));
   return rotationPtr->position(deg);
 };
 
@@ -42,9 +43,9 @@ std::vector<Robot::Encoders::RotationSensor> Robot::Encoders::encoders = {
 };
 // const double Robot::Dimensions::wheelRadius = 2.75;
 
-constexpr double Ss = 2.375; // back
-constexpr double Sl = 4.375; // right
-constexpr double Sr = 4.375; // left
+constexpr double Ss = 0.75; // back
+constexpr double Sl = 5.75; // right
+constexpr double Sr = 5.75; // left
 
 const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Sr, Sl,
                                                                        Ss};
@@ -53,40 +54,40 @@ const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Sr, Sl,
 
 // 2.375 vert
 // 4.375
-// const void Robot::Catapult::release() {
-//   Catapult1.spin(reverse, 100, pct);
-//   // Catapult1.spinFor(reverse, , deg);
-//   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing())
-//   {
-//     // printf("limit: %ld", CatapultLimitSwitch.pressing());
-//     wait(5, msec);
-//   }
-//   while (CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
-//     // printf("limit: %ld", CatapultLimitSwitch.pressing());
-//     wait(5, msec);
-//   }
-//   Catapult1.stop();
-// }
-// const void Robot::Catapult::retract() {
-//   Catapult1.spin(reverse, 100, pct);
-//   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing())
-//   {
-//     // printf("limit: %ld", CatapultLimitSwitch.pressing());
-//     wait(5, msec);
-//   }
-//   Catapult1.stop();
-// }
-// bool shooting = true;s
+const void Robot::Catapult::release() {
+  Catapult1.spin(reverse, 100, pct);
+  // Catapult1.spinFor(reverse, , deg);
+  while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+    // printf("limit: %ld", CatapultLimitSwitch.pressing());
+    // printf("release 1\n", CatapultLimitSwitch.pressing());
+    wait(5, msec);
+  }
+  while (CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+    // printf("release 2\n", CatapultLimitSwitch.pressing());
+    // printf("limit: %ld", CatapultLimitSwitch.pressing());
+    wait(5, msec);
+  }
+  Catapult1.stop();
+}
+const void Robot::Catapult::retract() {
+  Catapult1.spin(reverse, 100, pct);
+  // Catapult1.spin(reverse, 100, pct);
+  while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+    // printf("limit: %ld", CatapultLimitSwitch.pressing());
+    // printf("retract\n", CatapultLimitSwitch.pressing());
+    wait(5, msec);
+  }
+  Catapult1.stop();
+}
+// bool shooting = true;
 static bool shooting = false;
 const void Robot::Actions::shoot(const enum Robot::GOAL goal) {
   if (!shooting && !Controller1.ButtonY.pressing()) {
     shooting = true;
     Robot::Actions::stopIntake();
-    Catapult1.setVelocity(100, pct);
     thread([]() {
-      Catapult1.spinFor(reverse, 720, deg);
-      // Robot::Catapult::release();
-      // Robot::Catapult::retract();
+      Robot::Catapult::release();
+      Robot::Catapult::retract();
       shooting = false;
     });
   }
@@ -236,7 +237,7 @@ void visionAidedRoller() {
     // printf("vision roller\n");
     wait(10, msec);
   }
-  wait(75, msec);
+  wait(200, msec);
   // if (!(whatIsRoller() == Robot::team))
   //   visionAidedRoller();
   Intake.stop();

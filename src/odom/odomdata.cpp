@@ -11,6 +11,10 @@ void OdomData::Data::set(Data data) {
 };
 
 void OdomData::Data::update(Position pos1) {
+  // static constexpr float driveFactor =
+  //     Robot::Dimensions::driveWheelRadius * ;
+  // static constexpr float encoderFactor =
+  // Robot::Dimensions::encoderWheelRadius;
   yaw = Conversions::Degrees::toRadians(Robot::inertialSensor.heading(degrees));
   leftEnc = Conversions::Degrees::toRadians(
       Robot::Encoders::encoders[Robot::Encoders::ENCODER::LEFT].position());
