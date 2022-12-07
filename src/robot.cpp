@@ -19,7 +19,7 @@ inertial Robot::inertialSensor = Inertial10;
 //       type(Robot::Encoders::EncOrMotor::EncOrMotor::ENCODER_TYPE::ENCODER){};
 
 // const double Robot::Encoders::EncOrMotor::position() {
-//   switch (type) {
+//   switch (type) {cat
 //   case Robot::Encoders::EncOrMotor::EncOrMotor::ENCODER_TYPE::ENCODER:
 //     return encoderPtr->position(deg);
 //   case Robot::Encoders::EncOrMotor::EncOrMotor::ENCODER_TYPE::MOTOR:
@@ -88,11 +88,12 @@ const void Robot::Actions::shoot(const enum Robot::GOAL goal) {
     thread([]() {
       Robot::Catapult::release();
       Robot::Catapult::retract();
+      // Catapult1.spinFor(reverse, 1080, degrees);
       shooting = false;
     });
   }
 };
-const void keepCataDown(){
+// const void keepCataDown(){
     // static bool running = false;
     // if (!running)
     //   thread([]() {
@@ -106,7 +107,7 @@ const void keepCataDown(){
     //     }
     //     Robot::Catapult::retract();
     //   });
-};
+// };
 const void Robot::Actions::intake() {
   // if (CatapultLimitSwitch.pressing() && !shooting) {
   // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
@@ -237,7 +238,7 @@ void visionAidedRoller() {
     // printf("vision roller\n");
     wait(10, msec);
   }
-  wait(200, msec);
+  wait(300, msec);
   // if (!(whatIsRoller() == Robot::team))
   //   visionAidedRoller();
   Intake.stop();

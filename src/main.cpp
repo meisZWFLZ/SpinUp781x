@@ -64,6 +64,26 @@
 // Controller1          controller
 // Inertial10           inertial      21
 // CatapultLimitSwitch  limit         B
+// ExpansionPiston      digital_out   A
+// LeftDriveA           motor         11
+// LeftDriveB           motor         13
+// LeftDriveC           motor         12
+// RightDriveA          motor         14
+// RightDriveB          motor         16
+// RightDriveC          motor         15
+// Intake               motor         4
+// Catapult1            motor         20
+// LeftDriveR           rotation      17
+// RightDriveR          rotation      18
+// HoriR                rotation      10
+// RollerSensor         optical       9
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller
+// Inertial10           inertial      21
+// CatapultLimitSwitch  limit         B
 // ExpansionPiston      digital_out   F
 // LeftDriveA           motor         11
 // LeftDriveB           motor         13
@@ -466,6 +486,7 @@ void motorSetup() {
   ExpansionPiston.set(false);
 
   Catapult1.setStopping(coast);
+  Catapult1.setVelocity(100, pct);
 
   Robot::Drivetrain::Left = new motor_group(LeftDriveA, LeftDriveB, LeftDriveC);
   Robot::Drivetrain::Right =
@@ -743,44 +764,79 @@ inline const void driveStraight(float pct) {
   Robot::Drivetrain::right(pct);
   Robot::Drivetrain::left(pct);
 }
-void neilton() {
-  // into roller
-  driveStraight(0.3);
-  wait(400, msec);
+inline const void driveFor(float pct, int timeInMs) {
+  driveStraight(pct);
+  wait(timeInMs, msec);
+  // driveStraight(0);
+};
+inline const void driveForStop(float pct, int timeInMs) {
+  driveStraight(pct);
+  wait(timeInMs, msec);
   driveStraight(0);
+};
+
+// roller side
+void neilton3Low() {
+  // into roller
+  driveForStop(0.3, 400);
 
   Robot::Actions::roller();
   // out of roller
-  driveStraight(-0.3);
-  wait(200, msec);
+  driveFor(-0.3, 200);
 
+  // grab first disc
   turning(165);
   Robot::Actions::intake();
-  driveStraight(0.3);
-  wait(400, msec);
-  driveStraight(0);
+  driveForStop(0.3, 400);
   wait(1000, msec);
 
+  // aim towards low goal
   turning(115);
-  driveStraight(-0.3);
-  wait(1500, msec);
-  driveStraight(0);
+  driveFor(-0.3, 500);
   Robot::Actions::stopIntake();
+  driveForStop(-0.3, 1000);
 
+  // shoot into low goal
   Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
   wait(500, msec);
 
+  // grab 3 stack
   turning(220);
+  driveFor(0.6, 750);
+  driveStraight(0);
+  wait(500, msec);
   Robot::Actions::intake();
-  driveStraight(0.4);
-  wait(2000, msec);
+  driveFor(0.3, 1500);
   driveStraight(0);
   wait(2500, msec);
   Robot::Actions::stopIntake();
+}
 
+void neilton6Low() {
+  neilton3Low();
+  // shoot into low goal
   turning(130);
   Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
 }
+
+constexpr float conversionCoefficent =
+    (Robot::Dimensions::driveGearRatio * 360) /
+    (2 * M_PI * Robot::Dimensions::driveWheelRadius);
+constexpr float inchesToDeg(float inches) {
+  return inches * conversionCoefficent;
+};
+
+void driveDistance(float pct, float inches) {
+  driveStraight(pct);
+  const float goalDeg = inchesToDeg(inches);
+  LeftDriveR.setPosition(0, degrees);
+  RightDriveR.setPosition(0, degrees);
+  while ((LeftDriveR.position(degrees) + RightDriveR.position(degrees) / 2) <
+         goalDeg)
+    wait(40, msec);
+}
+
+// non-roller side
 void myton() {
   static constexpr float distance1 = 11.25 / 3;           // 17.27 inches
   static constexpr float distance2 = 9.5 / (2.75 * M_PI); // 6 inches
@@ -802,12 +858,12 @@ void myton() {
   Robot::Drivetrain::left(0);
   Robot::Drivetrain::right(0);
   Robot::Actions::roller();
-  printf("why neil be4\n");
+  // printf("why neil be4\n");
 }
 void preAuton() {
   // using namespace auton;w
   AutonSelection::start({
-      neilton,
+      neilton3Low,
       myton,
   });
   // myton();
@@ -956,8 +1012,8 @@ int main() {
 void controllerDisplay(/* OdomTracking tracker1 */) {
   Brain.Screen.clearScreen();
   // tracker = &tracker1;
-  Catapult1.setPosition(0, deg);
-  Controller1.ButtonA.pressed([]() { Catapult1.setPosition(0, deg); });
+  // Catapult1.setPosition(0, deg);
+  // Controller1.ButtonA.pressed([]() { Catapult1.setPosition(0, deg); });
 
   while (1) {
     // reset
@@ -1022,7 +1078,7 @@ void controllerDisplay(/* OdomTracking tracker1 */) {
     Controller1.Screen.print(")");
     Controller1.Screen.newLine();
 
-    printf("cata: %f\n", Catapult1.position(degrees));
+    // printf("cata: %f\n", Catapult1.position(degrees));
 
     wait(50, msec);
   }
