@@ -94,19 +94,19 @@ const void Robot::Actions::shoot(const enum Robot::GOAL goal) {
   }
 };
 // const void keepCataDown(){
-    // static bool running = false;
-    // if (!running)
-    //   thread([]() {
-    //     running = true;
-    //     while (!Controller1.ButtonLeft.pressing()) {
-    //       if ()
-    //       while(!shooting && !CatapultLimitSwitch.pressing()) {
-    //         Catapult1.spin(reverse, 100, pct);
-    //       }
+// static bool running = false;
+// if (!running)
+//   thread([]() {
+//     running = true;
+//     while (!Controller1.ButtonLeft.pressing()) {
+//       if ()
+//       while(!shooting && !CatapultLimitSwitch.pressing()) {
+//         Catapult1.spin(reverse, 100, pct);
+//       }
 
-    //     }
-    //     Robot::Catapult::retract();
-    //   });
+//     }
+//     Robot::Catapult::retract();
+//   });
 // };
 const void Robot::Actions::intake() {
   // if (CatapultLimitSwitch.pressing() && !shooting) {
@@ -116,7 +116,7 @@ const void Robot::Actions::intake() {
 };
 const void Robot::Actions::outtake() {
   // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
-  Intake.spin(reverse, 30, pct);
+  Intake.spin(reverse, 100, pct);
   // PTORight.spin(reverse, 30, pct);
 };
 const void Robot::Actions::stopIntake() {
@@ -125,7 +125,11 @@ const void Robot::Actions::stopIntake() {
   // PTORight.stop();
 };
 
-const void Robot::Actions::expand() { ExpansionPiston.set(true); };
+const void Robot::Actions::expand() {
+  ExpansionPiston.set(true);
+  wait(500, msec);
+  ExpansionPiston.set(false);
+};
 // const void Robot::Actions::pto(const Robot::PTO_STATE state) {
 //   if (Robot::PTOState == state)
 //     return;
@@ -227,12 +231,16 @@ void visionAidedRoller() {
   Intake.stop();
   // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
   spinningRoller = true;
+  const auto startTime = vex::timer::system();
   Intake.spin(fwd, 25, pct);
   if (whatIsRoller() == Robot::team)
     wait(250, msec);
   while (!(whatIsRoller() == Robot::team) /* 1 */) {
     if (Controller1.ButtonY.pressing())
       break;
+    if (vex::timer::system() - startTime > 2000)
+      break;
+    // printf("time:: %i", vex::timer::system() - startTime > 2000);
     // whatIsRoller();
     // printf("%d", whatIsRoller());
     // printf("vision roller\n");

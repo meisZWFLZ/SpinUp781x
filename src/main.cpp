@@ -1,123 +1,3 @@
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// Inertial10           inertial      21
-// CatapultLimitSwitch  limit         B
-// ExpansionPiston      digital_out   A
-// LeftDriveA           motor         11
-// LeftDriveB           motor         13
-// LeftDriveC           motor         12
-// RightDriveA          motor         14
-// RightDriveB          motor         16
-// RightDriveC          motor         15
-// Intake               motor         4
-// Catapult1            motor         20
-// LeftDriveR           rotation      17
-// RightDriveR          rotation      18
-// HoriR                rotation      10
-// RollerSensor         optical       9
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// Inertial10           inertial      21
-// CatapultLimitSwitch  limit         B
-// ExpansionPiston      digital_out   A
-// LeftDriveA           motor         11
-// LeftDriveB           motor         13
-// LeftDriveC           motor         12
-// RightDriveA          motor         14
-// RightDriveB          motor         16
-// RightDriveC          motor         15
-// Intake               motor         4
-// Catapult1            motor         20
-// LeftDriveR           rotation      17
-// RightDriveR          rotation      18
-// HoriR                rotation      10
-// RollerSensor         optical       9
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// Inertial10           inertial      21
-// CatapultLimitSwitch  limit         B
-// ExpansionPiston      digital_out   A
-// LeftDriveA           motor         11
-// LeftDriveB           motor         13
-// LeftDriveC           motor         12
-// RightDriveA          motor         14
-// RightDriveB          motor         16
-// RightDriveC          motor         15
-// Intake               motor         4
-// Catapult1            motor         20
-// LeftDriveR           rotation      17
-// RightDriveR          rotation      18
-// HoriR                rotation      10
-// RollerSensor         optical       9
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// Inertial10           inertial      21
-// CatapultLimitSwitch  limit         B
-// ExpansionPiston      digital_out   A
-// LeftDriveA           motor         11
-// LeftDriveB           motor         13
-// LeftDriveC           motor         12
-// RightDriveA          motor         14
-// RightDriveB          motor         16
-// RightDriveC          motor         15
-// Intake               motor         4
-// Catapult1            motor         20
-// LeftDriveR           rotation      17
-// RightDriveR          rotation      18
-// HoriR                rotation      10
-// RollerSensor         optical       9
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// Inertial10           inertial      21
-// CatapultLimitSwitch  limit         B
-// ExpansionPiston      digital_out   F
-// LeftDriveA           motor         11
-// LeftDriveB           motor         13
-// LeftDriveC           motor         12
-// RightDriveA          motor         14
-// RightDriveB          motor         16
-// RightDriveC          motor         15
-// Intake               motor         4
-// Catapult1            motor         20
-// LeftDriveR           rotation      17
-// RightDriveR          rotation      18
-// HoriR                rotation      10
-// RollerSensor         optical       9
-// ---- END VEXCODE CONFIGURED DEVICES ----
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller
-// Inertial10           inertial      21
-// CatapultLimitSwitch  limit         G
-// ExpansionPiston      digital_out   F
-// LeftDriveA           motor         11
-// LeftDriveB           motor         13
-// LeftDriveC           motor         12
-// RightDriveA          motor         14
-// RightDriveB          motor         16
-// RightDriveC          motor         15
-// Intake               motor         4
-// Catapult1            motor         20
-// LeftDriveR           rotation      17
-// RightDriveR          rotation      18
-// HoriR                rotation      10
-// RollerSensor         optical       9
-// ---- END VEXCODE CONFIGURED DEVICES ----
 #include "auton/elements.h"
 #include "conversions.h"
 #include "odom/tracking.h"
@@ -590,6 +470,11 @@ public:
     Brain.Screen.setFillColor(transparent);
     Brain.Screen.setCursor(1, 1);
     Brain.Screen.print(autonPos);
+    // Brain.Screen.newLine();
+    // Brain.Screen.setFont(monoXL);
+    // switch (autonPos) {
+    //   case 0:
+    // }
     Brain.Screen.setFillColor(Robot::TEAM::RED == Robot::team ? red : blue);
     Brain.Screen.drawRectangle(240, 0, 480, 240);
   }
@@ -657,7 +542,7 @@ void expansionCheck() {
   if (Controller1.ButtonA.pressing() && Controller1.ButtonB.pressing() &&
       Controller1.ButtonX.pressing() && Controller1.ButtonY.pressing())
     // Robot::Actions::expand();
-    printf("ref die time!\n");
+    Robot::Actions::expand();
 };
 void driverControl() {
   thread([] { controllerDisplay(/* {{}} */); });
@@ -749,10 +634,24 @@ void driverControl() {
   // ANYTHING AFTER THIS FUNCTION WILL NOT BE EXECUTED
   // controllerDisplay({{}});
 }
-
 void turning(int target) {
   Robot::Drivetrain::right(.30);
   Robot::Drivetrain::left(-.30);
+  while (std::abs(target - Inertial10.heading(degrees)) > 5) {
+    wait(20, msec);
+  }
+  Robot::Drivetrain::right(0);
+  Robot::Drivetrain::left(0);
+}
+void turning2(int target) {
+  if (headingDifference(Inertial10.heading(degrees), target + 90) >
+      headingDifference(Inertial10.heading(degrees), target - 90)) {
+    Robot::Drivetrain::right(.30);
+    Robot::Drivetrain::left(-.30);
+  } else {
+    Robot::Drivetrain::right(-.30);
+    Robot::Drivetrain::left(.30);
+  }
   while (std::abs(target - Inertial10.heading(degrees)) > 5) {
     wait(20, msec);
   }
@@ -776,13 +675,16 @@ inline const void driveForStop(float pct, int timeInMs) {
 };
 
 // roller side
-void neilton3Low() {
+void leftAutonRoller() {
   // into roller
   driveForStop(0.3, 400);
 
   Robot::Actions::roller();
-  // out of roller
-  driveFor(-0.3, 200);
+}
+void leftAuton3() {
+  leftAutonRoller();
+
+  driveFor(-0.3, 300);
 
   // grab first disc
   turning(165);
@@ -799,6 +701,9 @@ void neilton3Low() {
   // shoot into low goal
   Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
   wait(500, msec);
+}
+void leftAuton3Intake() {
+  leftAuton3();
 
   // grab 3 stack
   turning(220);
@@ -812,8 +717,8 @@ void neilton3Low() {
   Robot::Actions::stopIntake();
 }
 
-void neilton6Low() {
-  neilton3Low();
+void leftAuton6() {
+  leftAuton3Intake();
   // shoot into low goal
   turning(130);
   Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
@@ -837,8 +742,8 @@ void driveDistance(float pct, float inches) {
 }
 
 // non-roller side
-void myton() {
-  static constexpr float distance1 = 11.25 / 3;           // 17.27 inches
+void rightAutonRoller() {
+  static constexpr float distance1 = 11.24 / 3;           // 17.27 inches
   static constexpr float distance2 = 9.5 / (2.75 * M_PI); // 6 inches
 
   LeftDriveA.setPosition(0, turns);
@@ -847,7 +752,7 @@ void myton() {
   while (LeftDriveA.position(turns) < distance1)
     wait(40, msec);
   // printf("why neil be1\n");
-  turning(100);
+  turning2(80);
   // printf("why neil be2\n");
   LeftDriveA.setPosition(0, turns);
   Robot::Drivetrain::left(0.2);
@@ -855,17 +760,43 @@ void myton() {
   while (LeftDriveA.position(turns) < distance2)
     wait(40, msec);
   // printf("why neil be3\n");
-  Robot::Drivetrain::left(0);
-  Robot::Drivetrain::right(0);
+  driveStraight(0);
   Robot::Actions::roller();
+}
+void rightAutonDiscs() {
+  rightAutonRoller();
+  wait(500, msec);
+  //  Robot::Drivetrain::left(-0.3);
+  // Robot::Drivetrain::right(-0.3);
+  // wait(500,msec);
+  // Robot::Drivetrain::left(0);
+  // Robot::Drivetrain::right(0);
+  driveForStop(-0.3, 500);
+  turning2(200);
+  Robot::Actions::intake();
+  // Robot::Drivetrain::left(0.6);
+  // Robot::Drivetrain::right(0.6);
+  // wait(1000, msec);
+  // Robot::Drivetrain::left(0);
+  // Robot::Drivetrain::right(0);
+  driveForStop(0.6, 1000);
+  wait(1000, msec);
+  Robot::Actions::stopIntake();
+  turning2(340);
+  Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
   // printf("why neil be4\n");
 }
+void skillsAuton() {
+  leftAuton6();
+
+  Robot::Actions::expand();
+}
+void doNothing() { Brain.Screen.print("i should be doing nothing"); }
 void preAuton() {
   // using namespace auton;w
-  AutonSelection::start({
-      neilton3Low,
-      myton,
-  });
+  AutonSelection::start({leftAutonRoller, leftAuton3, leftAuton3Intake,
+                         leftAuton6, rightAutonRoller, rightAutonDiscs,
+                         doNothing, skillsAuton});
   // myton();
 }
 int main() {
@@ -873,7 +804,7 @@ int main() {
   // return 1;
   motorSetup();
 
-  Robot::team = Robot::TEAM::BLUE;
+  Robot::team = Robot::TEAM::RED;
 
   Inertial10.calibrate(2);
   // wait until inertial finsished calibrating
