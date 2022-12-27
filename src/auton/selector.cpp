@@ -40,3 +40,4 @@ void AutonSelector::run() {
   auton::autons[/* autonPos */ 0].second();
 };
 int AutonSelector::autonPos = 0;
+bool AutonSelector::initialized = false;
