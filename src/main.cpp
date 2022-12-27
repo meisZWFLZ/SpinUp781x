@@ -1,11 +1,12 @@
+#include "auton/action.h"
 #include "auton/elements.h"
+#include "auton/selector.h"
 #include "conversions.h"
 #include "odom/tracking.h"
 #include "pid_controller.h"
 #include "position.h"
 #include "vex.h"
 #include <atomic>
-#include <auton/action.h>
 #include <cmath>
 #include <iostream>
 #include <thread>
@@ -460,84 +461,84 @@ constexpr float headingDifference(float a, float b) {
 // PIDController::Callback *turnPID;
 // float target = 0;
 
-class AutonSelection {
-public:
-  static std::vector<std::function<void(void)>> autonArr;
-  static int autonPos;
-  static void print() {
-    Brain.Screen.clearScreen();
-    Brain.Screen.setFont(monoXXL);
-    Brain.Screen.setFillColor(transparent);
-    Brain.Screen.setCursor(1, 1);
-    Brain.Screen.print(autonPos);
-    // Brain.Screen.newLine();
-    // Brain.Screen.setFont(monoXL);
-    // switch (autonPos) {
-    //   case 0:
-    // }
-    Brain.Screen.setFillColor(Robot::TEAM::RED == Robot::team ? red : blue);
-    Brain.Screen.drawRectangle(240, 0, 480, 240);
-  }
-  static void listener() {
-    if (Brain.Screen.xPosition() < 240) {
-      // auton
-      autonPos = (autonPos + 1) % autonArr.size();
-    } else {
-      // team
-      Robot::team = Robot::TEAM::RED == Robot::team ? Robot::TEAM::BLUE
-                                                    : Robot::TEAM::RED;
-    }
-    print();
-  }
-  static const void
-  start(const std::vector<std::function<void(void)>> autonArr1) {
-    // autonArr1[0]();
-    autonArr = autonArr1;
-    Brain.Screen.setFont(monoXXL);
-    Brain.Screen.pressed(AutonSelection::listener);
-    print();
-  };
-  static void run() {
-    Brain.Screen.setFont(monoL);
-    Brain.Screen.setFillColor(transparent);
-    autonArr[/* autonPos */ 0]();
-  };
-};
-std::vector<std::function<void(void)>> AutonSelection::autonArr = {};
-int AutonSelection::autonPos = 0;
+// class AutonSelection {
+// public:
+//   static std::vector<std::function<void(void)>> autonArr;
+//   static int autonPos;
+//   static void print() {
+//     Brain.Screen.clearScreen();
+//     Brain.Screen.setFont(monoXXL);
+//     Brain.Screen.setFillColor(transparent);
+//     Brain.Screen.setCursor(1, 1);
+//     Brain.Screen.print(autonPos);
+//     // Brain.Screen.newLine();
+//     // Brain.Screen.setFont(monoXL);
+//     // switch (autonPos) {
+//     //   case 0:
+//     // }
+//     Brain.Screen.setFillColor(Robot::TEAM::RED == Robot::team ? red : blue);
+//     Brain.Screen.drawRectangle(240, 0, 480, 240);
+//   }
+//   static void listener() {
+//     if (Brain.Screen.xPosition() < 240) {
+//       // auton
+//       autonPos = (autonPos + 1) % autonArr.size();
+//     } else {
+//       // team
+//       Robot::team = Robot::TEAM::RED == Robot::team ? Robot::TEAM::BLUE
+//                                                     : Robot::TEAM::RED;
+//     }
+//     print();
+//   }
+//   static const void
+//   start(const std::vector<std::function<void(void)>> autonArr1) {
+//     // autonArr1[0]();
+//     autonArr = autonArr1;
+//     Brain.Screen.setFont(monoXXL);
+//     Brain.Screen.pressed(AutonSelection::listener);
+//     print();
+//   };
+//   static void run() {
+//     Brain.Screen.setFont(monoL);
+//     Brain.Screen.setFillColor(transparent);
+//     autonArr[/* autonPos */ 0]();
+//   };
+// };
+// std::vector<std::function<void(void)>> AutonSelection::autonArr = {};
+// int AutonSelection::autonPos = 0;
 
 // void autonSelection(const std::vector<std::function<void(void)>> autonArr1) {
 //   static int autoPos = 0;
 //   static const std::vector<std::function<void(void)>> autonArr = autonArr1;
 // }
-competition Competition;
+// competition Competition;
 
-void autonomous() {
-  Brain.Screen.print("neil bad!");
+// void autonomous() {
+//   Brain.Screen.print("neil bad!");
 
-  // Robot::Drivetrain::left(10);
-  // Robot::Drivetrain::right(10);
-  // wait(250, msec);
-  AutonSelection::run();
-  // // Robot::Actions::outtake();
-  // // Robot::Drivetrain::left(-10);
-  // // Robot::Drivetrain::right(-10);
-  // wait(250, msec);
-  // // Robot::Actions::stopIntake();
-  // Robot::Drivetrain::left(0);
-  // Robot::Drivetrain::right(0);
-  // Robot::Drivetrain::left(30);
-  // Robot::Drivetrain::right(30);
-  // wait(750, msec);
-  // // AutonSelection::run();
-  // Robot::Actions::outtake();
-  // Robot::Drivetrain::left(-15);
-  // Robot::Drivetrain::right(-15);
-  // wait(750, msec);
-  // Robot::Actions::stopIntake();
-  // Robot::Drivetrain::left(0);
-  // Robot::Drivetrain::right(0);
-};
+//   // Robot::Drivetrain::left(10);
+//   // Robot::Drivetrain::right(10);
+//   // wait(250, msec);
+//   // AutonSelection::run(); 
+//   // // Robot::Actions::outtake();
+//   // // Robot::Drivetrain::left(-10);
+//   // // Robot::Drivetrain::right(-10);
+//   // wait(250, msec);
+//   // // Robot::Actions::stopIntake();
+//   // Robot::Drivetrain::left(0);
+//   // Robot::Drivetrain::right(0);
+//   // Robot::Drivetrain::left(30);
+//   // Robot::Drivetrain::right(30);
+//   // wait(750, msec);
+//   // // AutonSelection::run();
+//   // Robot::Actions::outtake();
+//   // Robot::Drivetrain::left(-15);
+//   // Robot::Drivetrain::right(-15);
+//   // wait(750, msec);
+//   // Robot::Actions::stopIntake();
+//   // Robot::Drivetrain::left(0);
+//   // Robot::Drivetrain::right(0);
+// };
 void expansionCheck() {
   if (Controller1.ButtonA.pressing() && Controller1.ButtonB.pressing() &&
       Controller1.ButtonX.pressing() && Controller1.ButtonY.pressing())
@@ -634,169 +635,169 @@ void driverControl() {
   // ANYTHING AFTER THIS FUNCTION WILL NOT BE EXECUTED
   // controllerDisplay({{}});
 }
-void turning(int target) {
-  Robot::Drivetrain::right(.30);
-  Robot::Drivetrain::left(-.30);
-  while (std::abs(target - Inertial10.heading(degrees)) > 5) {
-    wait(20, msec);
-  }
-  Robot::Drivetrain::right(0);
-  Robot::Drivetrain::left(0);
-}
-void turning2(int target) {
-  if (headingDifference(Inertial10.heading(degrees), target + 90) >
-      headingDifference(Inertial10.heading(degrees), target - 90)) {
-    Robot::Drivetrain::right(.30);
-    Robot::Drivetrain::left(-.30);
-  } else {
-    Robot::Drivetrain::right(-.30);
-    Robot::Drivetrain::left(.30);
-  }
-  while (std::abs(target - Inertial10.heading(degrees)) > 5) {
-    wait(20, msec);
-  }
-  Robot::Drivetrain::right(0);
-  Robot::Drivetrain::left(0);
-}
+// void turning(int target) {
+//   Robot::Drivetrain::right(.30);
+//   Robot::Drivetrain::left(-.30);
+//   while (std::abs(target - Inertial10.heading(degrees)) > 5) {
+//     wait(20, msec);
+//   }
+//   Robot::Drivetrain::right(0);
+//   Robot::Drivetrain::left(0);
+// }
+// void turning2(int target) {
+//   if (headingDifference(Inertial10.heading(degrees), target + 90) >
+//       headingDifference(Inertial10.heading(degrees), target - 90)) {
+//     Robot::Drivetrain::right(.30);
+//     Robot::Drivetrain::left(-.30);
+//   } else {
+//     Robot::Drivetrain::right(-.30);
+//     Robot::Drivetrain::left(.30);
+//   }
+//   while (std::abs(target - Inertial10.heading(degrees)) > 5) {
+//     wait(20, msec);
+//   }
+//   Robot::Drivetrain::right(0);
+//   Robot::Drivetrain::left(0);
+// }
 
-inline const void driveStraight(float pct) {
-  Robot::Drivetrain::right(pct);
-  Robot::Drivetrain::left(pct);
-}
-inline const void driveFor(float pct, int timeInMs) {
-  driveStraight(pct);
-  wait(timeInMs, msec);
-  // driveStraight(0);
-};
-inline const void driveForStop(float pct, int timeInMs) {
-  driveStraight(pct);
-  wait(timeInMs, msec);
-  driveStraight(0);
-};
+// inline const void driveStraight(float pct) {
+//   Robot::Drivetrain::right(pct);
+//   Robot::Drivetrain::left(pct);
+// }
+// inline const void driveFor(float pct, int timeInMs) {
+//   driveStraight(pct);
+//   wait(timeInMs, msec);
+//   // driveStraight(0);
+// };
+// inline const void driveForStop(float pct, int timeInMs) {
+//   driveStraight(pct);
+//   wait(timeInMs, msec);
+//   driveStraight(0);
+// };
 
-// roller side
-void leftAutonRoller() {
-  // into roller
-  driveForStop(0.3, 400);
+// // roller side
+// void leftAutonRoller() {
+//   // into roller
+//   driveForStop(0.3, 400);
 
-  Robot::Actions::roller();
-}
-void leftAuton3() {
-  leftAutonRoller();
+//   Robot::Actions::roller();
+// }
+// void leftAuton3() {
+//   leftAutonRoller();
 
-  driveFor(-0.3, 300);
+//   driveFor(-0.3, 300);
 
-  // grab first disc
-  turning(165);
-  Robot::Actions::intake();
-  driveForStop(0.3, 400);
-  wait(1000, msec);
+//   // grab first disc
+//   turning(165);
+//   Robot::Actions::intake();
+//   driveForStop(0.3, 400);
+//   wait(1000, msec);
 
-  // aim towards low goal
-  turning(115);
-  driveFor(-0.3, 500);
-  Robot::Actions::stopIntake();
-  driveForStop(-0.3, 1000);
+//   // aim towards low goal
+//   turning(115);
+//   driveFor(-0.3, 500);
+//   Robot::Actions::stopIntake();
+//   driveForStop(-0.3, 1000);
 
-  // shoot into low goal
-  Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
-  wait(500, msec);
-}
-void leftAuton3Intake() {
-  leftAuton3();
+//   // shoot into low goal
+//   Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
+//   wait(500, msec);
+// }
+// void leftAuton3Intake() {
+//   leftAuton3();
 
-  // grab 3 stack
-  turning(220);
-  driveFor(0.6, 750);
-  driveStraight(0);
-  wait(500, msec);
-  Robot::Actions::intake();
-  driveFor(0.3, 1500);
-  driveStraight(0);
-  wait(2500, msec);
-  Robot::Actions::stopIntake();
-}
+//   // grab 3 stack
+//   turning(220);
+//   driveFor(0.6, 750);
+//   driveStraight(0);
+//   wait(500, msec);
+//   Robot::Actions::intake();
+//   driveFor(0.3, 1500);
+//   driveStraight(0);
+//   wait(2500, msec);
+//   Robot::Actions::stopIntake();
+// }
 
-void leftAuton6() {
-  leftAuton3Intake();
-  // shoot into low goal
-  turning(130);
-  Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
-}
+// void leftAuton6() {
+//   leftAuton3Intake();
+//   // shoot into low goal
+//   turning(130);
+//   Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
+// }
 
-constexpr float conversionCoefficent =
-    (Robot::Dimensions::driveGearRatio * 360) /
-    (2 * M_PI * Robot::Dimensions::driveWheelRadius);
-constexpr float inchesToDeg(float inches) {
-  return inches * conversionCoefficent;
-};
+// constexpr float conversionCoefficent =
+//     (Robot::Dimensions::driveGearRatio * 360) /
+//     (2 * M_PI * Robot::Dimensions::driveWheelRadius);
+// constexpr float inchesToDeg(float inches) {
+//   return inches * conversionCoefficent;
+// };
 
-void driveDistance(float pct, float inches) {
-  driveStraight(pct);
-  const float goalDeg = inchesToDeg(inches);
-  LeftDriveR.setPosition(0, degrees);
-  RightDriveR.setPosition(0, degrees);
-  while ((LeftDriveR.position(degrees) + RightDriveR.position(degrees) / 2) <
-         goalDeg)
-    wait(40, msec);
-}
+// void driveDistance(float pct, float inches) {
+//   driveStraight(pct);
+//   const float goalDeg = inchesToDeg(inches);
+//   LeftDriveR.setPosition(0, degrees);
+//   RightDriveR.setPosition(0, degrees);
+//   while ((LeftDriveR.position(degrees) + RightDriveR.position(degrees) / 2) <
+//          goalDeg)
+//     wait(40, msec);
+// }
 
-// non-roller side
-void rightAutonRoller() {
-  static constexpr float distance1 = 11.24 / 3;           // 17.27 inches
-  static constexpr float distance2 = 9.5 / (2.75 * M_PI); // 6 inches
+// // non-roller side
+// void rightAutonRoller() {
+//   static constexpr float distance1 = 11.24 / 3;           // 17.27 inches
+//   static constexpr float distance2 = 9.5 / (2.75 * M_PI); // 6 inches
 
-  LeftDriveA.setPosition(0, turns);
-  Robot::Drivetrain::left(0.2);
-  Robot::Drivetrain::right(0.2);
-  while (LeftDriveA.position(turns) < distance1)
-    wait(40, msec);
-  // printf("why neil be1\n");
-  turning2(80);
-  // printf("why neil be2\n");
-  LeftDriveA.setPosition(0, turns);
-  Robot::Drivetrain::left(0.2);
-  Robot::Drivetrain::right(0.2);
-  while (LeftDriveA.position(turns) < distance2)
-    wait(40, msec);
-  // printf("why neil be3\n");
-  driveStraight(0);
-  Robot::Actions::roller();
-}
-void rightAutonDiscs() {
-  rightAutonRoller();
-  wait(500, msec);
-  //  Robot::Drivetrain::left(-0.3);
-  // Robot::Drivetrain::right(-0.3);
-  // wait(500,msec);
-  // Robot::Drivetrain::left(0);
-  // Robot::Drivetrain::right(0);
-  driveForStop(-0.3, 500);
-  turning2(200);
-  Robot::Actions::intake();
-  // Robot::Drivetrain::left(0.6);
-  // Robot::Drivetrain::right(0.6);
-  // wait(1000, msec);
-  // Robot::Drivetrain::left(0);
-  // Robot::Drivetrain::right(0);
-  driveForStop(0.6, 1000);
-  wait(1000, msec);
-  Robot::Actions::stopIntake();
-  turning2(340);
-  Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
-  // printf("why neil be4\n");
-}
-void skillsAuton() {
-  leftAuton6();
+//   LeftDriveA.setPosition(0, turns);
+//   Robot::Drivetrain::left(0.2);
+//   Robot::Drivetrain::right(0.2);
+//   while (LeftDriveA.position(turns) < distance1)
+//     wait(40, msec);
+//   // printf("why neil be1\n");
+//   turning2(80);
+//   // printf("why neil be2\n");
+//   LeftDriveA.setPosition(0, turns);
+//   Robot::Drivetrain::left(0.2);
+//   Robot::Drivetrain::right(0.2);
+//   while (LeftDriveA.position(turns) < distance2)
+//     wait(40, msec);
+//   // printf("why neil be3\n");
+//   driveStraight(0);
+//   Robot::Actions::roller();
+// }
+// void rightAutonDiscs() {
+//   rightAutonRoller();
+//   wait(500, msec);
+//   //  Robot::Drivetrain::left(-0.3);
+//   // Robot::Drivetrain::right(-0.3);
+//   // wait(500,msec);
+//   // Robot::Drivetrain::left(0);
+//   // Robot::Drivetrain::right(0);
+//   driveForStop(-0.3, 500);
+//   turning2(200);
+//   Robot::Actions::intake();
+//   // Robot::Drivetrain::left(0.6);
+//   // Robot::Drivetrain::right(0.6);
+//   // wait(1000, msec);
+//   // Robot::Drivetrain::left(0);
+//   // Robot::Drivetrain::right(0);
+//   driveForStop(0.6, 1000);
+//   wait(1000, msec);
+//   Robot::Actions::stopIntake();
+//   turning2(340);
+//   Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
+//   // printf("why neil be4\n");
+// }
+// void skillsAuton() {
+//   leftAuton6();
 
-  Robot::Actions::expand();
-}
-void doNothing() { Brain.Screen.print("i should be doing nothing"); }
+//   Robot::Actions::expand();
+// }
+
 void preAuton() {
   // using namespace auton;w
-  AutonSelection::start({leftAutonRoller, leftAuton3, leftAuton3Intake,
-                         leftAuton6, rightAutonRoller, rightAutonDiscs,
-                         doNothing, skillsAuton});
+  // AutonSelection::start({leftAutonRoller, leftAuton3, leftAuton3Intake,
+  //                        leftAuton6, rightAutonRoller, rightAutonDiscs,
+  //                        doNothing, skillsAuton});
   // myton();
 }
 int main() {

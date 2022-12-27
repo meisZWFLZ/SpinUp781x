@@ -152,7 +152,7 @@ OdomTracking::findTravelCoord(const Position &deltaPos) {
 
   // stole from pilons:
   // https://github.com/nickmertin/5225A-2017-2018/blob/master/src/auto.c
-  const float globalAngle = data.curr.yaw/*  - (deltaPos.heading / 2) */;
+  const float globalAngle = data.curr.yaw - (deltaPos.heading / 2); // dont get rid of that you silly
   float cosP = cos(globalAngle);
   float sinP = sin(globalAngle);
   return {(deltaPos.y * sinP) + (deltaPos.x * cosP),

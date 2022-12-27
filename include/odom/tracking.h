@@ -38,7 +38,7 @@ public:
   double findTravelY(const Position &deltaPos);
 
   Position findRobotPosition();
-
+  
 public:
   constexpr static const double WAIT_TIME = 20;
   void reset(const Position pos);

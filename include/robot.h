@@ -24,7 +24,8 @@ public:
   class Dimensions {
   public:
     static constexpr float driveWheelRadius = 2.75 / 2;
-    static constexpr double driveGearRatio = 3 / 4; // 3 turns of wheel to 4 turns of rotation sensor 
+    static constexpr double driveGearRatio =
+        3 / 4; // 3 turns of wheel to 4 turns of rotation sensor
     static constexpr float encoderWheelRadius = 2.75 / 2;
   };
   class Encoders {
@@ -57,8 +58,8 @@ public:
   static inertial inertialSensor;
   class Drivetrain {
   public:
-    static motor_group* Left;
-    static motor_group* Right;
+    static motor_group *Left;
+    static motor_group *Right;
     static const void left(const float pct);
     static const void right(const float pct);
   };
