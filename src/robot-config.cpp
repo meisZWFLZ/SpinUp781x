@@ -9,21 +9,23 @@ brain  Brain;
 
 // VEXcode device constructors
 controller Controller1 = controller(primary);
-inertial Inertial10 = inertial(PORT21);
-limit CatapultLimitSwitch = limit(Brain.ThreeWirePort.B);
-digital_out ExpansionPiston = digital_out(Brain.ThreeWirePort.A);
-motor LeftDriveA = motor(PORT11, ratio6_1, true);
-motor LeftDriveB = motor(PORT13, ratio6_1, true);
-motor LeftDriveC = motor(PORT12, ratio6_1, false);
-motor RightDriveA = motor(PORT14, ratio6_1, false);
-motor RightDriveB = motor(PORT16, ratio18_1, false);
-motor RightDriveC = motor(PORT15, ratio6_1, true);
-motor Intake = motor(PORT4, ratio6_1, false);
-motor Catapult1 = motor(PORT20, ratio18_1, false);
-rotation LeftDriveR = rotation(PORT17, false);
-rotation RightDriveR = rotation(PORT18, false);
-rotation HoriR = rotation(PORT10, false);
-optical RollerSensor = optical(PORT9);
+inertial Inertial10 = inertial(PORT15);
+limit CatapultLimitSwitch = limit(Brain.ThreeWirePort.A);
+digital_out ExpansionPiston = digital_out(Brain.ThreeWirePort.H);
+motor LeftDriveA = motor(PORT12, ratio6_1, true);
+motor LeftDriveB = motor(PORT10, ratio6_1, true);
+motor LeftDriveC = motor(PORT11, ratio6_1, true);
+motor RightDriveA = motor(PORT19, ratio6_1, false);
+motor RightDriveB = motor(PORT18, ratio18_1, false);
+motor RightDriveC = motor(PORT20, ratio6_1, false);
+motor Intake = motor(PORT16, ratio6_1, false);
+motor Catapult1 = motor(PORT9, ratio18_1, false);
+rotation LeftDriveR = rotation(PORT1, false);
+rotation RightDriveR = rotation(PORT2, false);
+rotation HoriR = rotation(PORT3, false);
+optical RollerSensor = optical(PORT13);
+digital_out DiscLock1 = digital_out(Brain.ThreeWirePort.B);
+digital_out CataAngler = digital_out(Brain.ThreeWirePort.E);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

@@ -21,7 +21,7 @@ void rightDriveSubscriber() {
 }
 // shoot
 void shootListener() { Robot::Actions::shoot((Robot::GOAL)(int)Robot::team); }
-
+void angleshootListener() { Robot::Actions::AngleShoot((Robot::GOAL)(int)Robot::team); }
 void motorSetup() {
   // retract expansion
   ExpansionPiston.set(false);
@@ -63,7 +63,12 @@ void driverControl() {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //    START CATA TEST
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+Controller1.ButtonLeft.pressed([]() {
+while(Controller1.ButtonLeft.pressing()){
+  Robot::DiscLock::unlocked();
+printf("HEH");
+}
+});
   Controller1.ButtonUp.pressed([]() {
     Catapult1.spin(fwd, 100, pct);
     while (Controller1.ButtonUp.pressing()) {
@@ -92,7 +97,7 @@ void driverControl() {
 
   // shoot pressed
   Controller1.ButtonL1.pressed(shootListener);
-
+Controller1.ButtonL2.pressed(angleshootListener);
   // intake toggle
   Controller1.ButtonR1.pressed([]() {
     if (Intake.voltage(volt) > 0.1)
@@ -110,7 +115,7 @@ void driverControl() {
   });
 
   // roller
-  Controller1.ButtonL2.pressed([] { Robot::Actions::roller(); });
+  //Controller1.ButtonL2.pressed([] { Robot::Actions::roller(); });
 
   // expansion
   Controller1.ButtonA.pressed(expansionCheck);
@@ -147,6 +152,7 @@ int main() {
   }
   return 1;
 
+
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //    END COMPETITION
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -156,7 +162,7 @@ void controllerDisplay() {
   while (1) {
     // reset
     Controller1.Screen.setCursor(0, 0);
-  
+
     // drive temp
     Controller1.Screen.clearLine();
     Controller1.Screen.print("drive: ");

@@ -54,17 +54,45 @@ const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Sr, Sl,
 
 // 2.375 vert
 // 4.375
+const void Robot::DiscLock::unlocked(){
+DiscLock1.set(true);
+}
+const void Robot::DiscLock::locked(){
+DiscLock1.set(false);
+}
+const void Robot::Catapult::AngleRelease() {
+  Catapult1.spin(reverse, 100, pct);
+  // Catapult1.spinFor(reverse, , deg);
+  while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+    // printf("limit: %ld", CatapultLimitSwitch.pressing());
+    printf("release 1, limit:%ld\n", CatapultLimitSwitch.pressing());
+    wait(5, msec);
+
+  }
+  while (CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+    printf("release 2, limit:%ld\n", CatapultLimitSwitch.pressing());
+    // printf("limit: %ld", CatapultLimitSwitch.pressing());
+    // printf("release 2\n");
+    wait(5, msec);
+  }
+  Catapult1.stop();
+  wait(50,msec);
+  CataAngler.set(true);
+  wait(100,msec);
+  CataAngler.set(false);
+}
 const void Robot::Catapult::release() {
   Catapult1.spin(reverse, 100, pct);
   // Catapult1.spinFor(reverse, , deg);
   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
-    // printf("release 1\n", CatapultLimitSwitch.pressing());
+    printf("release 1, limit:%ld\n", CatapultLimitSwitch.pressing());
     wait(5, msec);
   }
   while (CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
-    // printf("release 2\n", CatapultLimitSwitch.pressing());
+    printf("release 2, limit:%ld\n", CatapultLimitSwitch.pressing());
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
+    // printf("release 2\n");
     wait(5, msec);
   }
   Catapult1.stop();
@@ -73,6 +101,7 @@ const void Robot::Catapult::retract() {
   Catapult1.spin(reverse, 100, pct);
   // Catapult1.spin(reverse, 100, pct);
   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+    printf("retract, limit:%ld\n", CatapultLimitSwitch.pressing());
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
     // printf("retract\n", CatapultLimitSwitch.pressing());
     wait(5, msec);
@@ -86,8 +115,25 @@ const void Robot::Actions::shoot(const enum Robot::GOAL goal) {
     shooting = true;
     Robot::Actions::stopIntake();
     thread([]() {
+      Robot::DiscLock::unlocked();
       Robot::Catapult::release();
       Robot::Catapult::retract();
+      Robot::DiscLock::locked();
+      // Catapult1.spinFor(reverse, 1080, degrees);
+      shooting = false;
+    });
+  }
+};
+
+const void Robot::Actions::AngleShoot(const enum Robot::GOAL goal) {
+  if (!shooting && !Controller1.ButtonX.pressing()) {
+    shooting = true;
+    Robot::Actions::stopIntake();
+    thread([]() {
+      Robot::DiscLock::unlocked();
+      Robot::Catapult::AngleRelease();
+      Robot::Catapult::retract();
+      Robot::DiscLock::locked();
       // Catapult1.spinFor(reverse, 1080, degrees);
       shooting = false;
     });
@@ -111,12 +157,12 @@ const void Robot::Actions::shoot(const enum Robot::GOAL goal) {
 const void Robot::Actions::intake() {
   // if (CatapultLimitSwitch.pressing() && !shooting) {
   // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
-  Intake.spin(fwd, 100, pct);
+  Intake.spin(fwd, 12, volt);
   // }
 };
 const void Robot::Actions::outtake() {
   // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
-  Intake.spin(reverse, 100, pct);
+  Intake.spin(reverse, 12, volt);
   // PTORight.spin(reverse, 30, pct);
 };
 const void Robot::Actions::stopIntake() {

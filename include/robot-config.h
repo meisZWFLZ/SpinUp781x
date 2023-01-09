@@ -19,6 +19,8 @@ extern rotation LeftDriveR;
 extern rotation RightDriveR;
 extern rotation HoriR;
 extern optical RollerSensor;
+extern digital_out DiscLock1;
+extern digital_out CataAngler;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

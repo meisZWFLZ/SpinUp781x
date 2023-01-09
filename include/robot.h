@@ -70,7 +70,14 @@ public:
   public:
     static const void retract();
     static const void release();
+    static const void AngleRelease();
   };
+  class DiscLock{
+    public:
+    static const void locked();
+    static const void unlocked();
+  };
+  
   // enum class PTO_STATE : bool { DRIVE, INTAKE };
   // static enum PTO_STATE PTOState;
   enum class CATAPULT_STATE : bool { UP, DOWN };
@@ -78,6 +85,7 @@ public:
   public:
     // static const void keepCataDown();
     static const void shoot(const Robot::GOAL);
+    static const void AngleShoot(const Robot::GOAL);
     static const void intake();
     static const void outtake();
     static const void stopIntake();

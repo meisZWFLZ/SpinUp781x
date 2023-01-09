@@ -205,7 +205,7 @@ void doNothing() { Brain.Screen.print("i should be doing nothing"); }
 const std::vector<std::pair<const char *, const std::function<void(void)>>>
     autons = {{"Left Roller", leftAutonRoller},
               {"Left R 3Low", leftAuton3},
-              {"Left R 3Low 3In", leftAuton3Intake},
+              {"Left R 3Low \n3In", leftAuton3Intake},
               {"Left R 6Low", leftAuton6},
               {"Right Roller", rightAutonRoller},
               {"Right R 3Low", rightAutonDiscs},
