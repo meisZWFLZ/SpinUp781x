@@ -90,33 +90,49 @@ void driveDistance(float pct, float inches) {
 // roller side
 void leftAutonRoller() {
   // into roller
-  driveForStop(0.3, 400);
-
+  // driveForStop(0.3, 400);
+  driveFor(-0.15,500);
   Robot::Actions::roller();
+  driveStraight(0);
 }
-void leftAuton3() {
+void leftAuton3In() {
   leftAutonRoller();
+  driveFor(0.2, 200);
 
-  driveFor(-0.3, 300);
+  if (!Inertial10.installed())
+    return;
 
   // grab first disc
-  turning(165);
+  // turning(165);
+  turning(335);
   Robot::Actions::intake();
-  driveForStop(0.3, 400);
-  wait(1000, msec);
-
+  driveForStop(0.2, 500);
+  wait(500, msec);
+  Robot::Actions::stopIntake();
+  wait(50, msec);
+  Robot::Actions::intake();
+  wait(500, msec);
+  driveForStop(-0.3, 400);
+}
+void leftAuton2Roller() {
+  leftAuton3In();
+  turning2(215);
+  driveForStop(-0.5, 3000);
+}
+void leftAuton3Low() {
+  leftAuton3In();
   // aim towards low goal
   turning(115);
+  // Robot::Actions::stopIntake();
   driveFor(-0.3, 500);
-  Robot::Actions::stopIntake();
   driveForStop(-0.3, 1000);
 
   // shoot into low goal
   Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
   wait(500, msec);
 }
-void leftAuton3Intake() {
-  leftAuton3();
+void leftAuton3Low3In() {
+  leftAuton3Low();
 
   // grab 3 stack
   turning(220);
@@ -131,7 +147,7 @@ void leftAuton3Intake() {
 }
 
 void leftAuton6() {
-  leftAuton3Intake();
+  leftAuton3Low3In();
   // shoot into low goal
   turning(130);
   Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
@@ -152,16 +168,18 @@ void rightAutonRoller() {
   while (LeftDriveA.position(turns) < distance1)
     wait(40, msec);
   // printf("why neil be1\n");
-  turning2(80);
+  turning2(280);
   // printf("why neil be2\n");
   LeftDriveA.setPosition(0, turns);
-  Robot::Drivetrain::left(0.2);
-  Robot::Drivetrain::right(0.2);
+  Robot::Drivetrain::left(-0.2);
+  Robot::Drivetrain::right(-0.2);
   while (LeftDriveA.position(turns) < distance2)
     wait(40, msec);
+    wait(500, msec);
   // printf("why neil be3\n");
-  driveStraight(0);
+  driveStraight(-0.15);
   Robot::Actions::roller();
+  driveStraight(0);
 }
 void rightAutonDiscs() {
   rightAutonRoller();
@@ -204,8 +222,9 @@ void skillsAuton() {
 void doNothing() { Brain.Screen.print("i should be doing nothing"); }
 const std::vector<std::pair<const char *, const std::function<void(void)>>>
     autons = {{"Left Roller", leftAutonRoller},
-              {"Left R 3Low", leftAuton3},
-              {"Left R 3Low \n3In", leftAuton3Intake},
+              {"Left R 3Low", leftAuton3Low},
+              {"Left 2R 3In", leftAuton2Roller},
+              {"Left R 3Low 3In", leftAuton3Low3In},
               {"Left R 6Low", leftAuton6},
               {"Right Roller", rightAutonRoller},
               {"Right R 3Low", rightAutonDiscs},

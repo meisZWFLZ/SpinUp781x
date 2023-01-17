@@ -70,14 +70,14 @@ public:
   public:
     static const void retract();
     static const void release();
-    static const void AngleRelease();
+    // static const void AngleRelease();
   };
-  class DiscLock{
-    public:
-    static const void locked();
-    static const void unlocked();
+  class DiscLock {
+  public:
+    static const void lock();
+    static const void unlock();
   };
-  
+
   // enum class PTO_STATE : bool { DRIVE, INTAKE };
   // static enum PTO_STATE PTOState;
   enum class CATAPULT_STATE : bool { UP, DOWN };
@@ -89,10 +89,19 @@ public:
     static const void intake();
     static const void outtake();
     static const void stopIntake();
-    static const void roller(); // to do
+    static void roller();       // to do
     static const void expand(); // to do
     // static const void pto(const Robot::PTO_STATE state);
     static const void goTo(const Position pos); // to do
+  };
+  class InputListeners {
+    static void leftDrive(int);
+    static void rightDrive(int);
+    static void shoot();
+    static void roller();
+    static void intake();
+    static void outake();
+    static void expand();
   };
   static const Position getPosition();
   static const CATAPULT_STATE catapultState();

@@ -4,13 +4,15 @@
 
 void AutonSelector::print() {
   Brain.Screen.clearScreen();
+  // team color
+  Brain.Screen.setFillColor(Robot::TEAM::RED == Robot::team ? red : blue);
+  Brain.Screen.drawRectangle(240, 0, 480, 240);
+  
+  // auton display
   Brain.Screen.setFont(monoXL);
   Brain.Screen.setFillColor(transparent);
   Brain.Screen.setCursor(1, 1);
   Brain.Screen.print(auton::autons[autonPos].first);
-
-  Brain.Screen.setFillColor(Robot::TEAM::RED == Robot::team ? red : blue);
-  Brain.Screen.drawRectangle(240, 0, 480, 240);
 }
 void AutonSelector::listener() {
   if (Brain.Screen.xPosition() < 240) {
@@ -37,7 +39,7 @@ const void AutonSelector::start(
 void AutonSelector::run() {
   Brain.Screen.setFont(monoL);
   Brain.Screen.setFillColor(transparent);
-  auton::autons[/* autonPos */ 0].second();
+  auton::autons[autonPos].second();
 };
 int AutonSelector::autonPos = 0;
 bool AutonSelector::initialized = false;

@@ -22,6 +22,9 @@
 
 static competition Competition = {};
 
+extern bool getFailSafe();
+extern int getDriveCoefficent();
+
 #define waitUntil(condition)                                                   \
   do {                                                                         \
     wait(5, msec);                                                             \

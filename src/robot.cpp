@@ -54,35 +54,32 @@ const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Sr, Sl,
 
 // 2.375 vert
 // 4.375
-const void Robot::DiscLock::unlocked(){
-DiscLock1.set(true);
-}
-const void Robot::DiscLock::locked(){
-DiscLock1.set(false);
-}
-const void Robot::Catapult::AngleRelease() {
-  Catapult1.spin(reverse, 100, pct);
-  // Catapult1.spinFor(reverse, , deg);
-  while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
-    // printf("limit: %ld", CatapultLimitSwitch.pressing());
-    printf("release 1, limit:%ld\n", CatapultLimitSwitch.pressing());
-    wait(5, msec);
-
-  }
-  while (CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
-    printf("release 2, limit:%ld\n", CatapultLimitSwitch.pressing());
-    // printf("limit: %ld", CatapultLimitSwitch.pressing());
-    // printf("release 2\n");
-    wait(5, msec);
-  }
-  Catapult1.stop();
-  wait(50,msec);
-  CataAngler.set(true);
-  wait(100,msec);
-  CataAngler.set(false);
-}
+const void Robot::DiscLock::unlock() { DiscLock1.set(true); }
+const void Robot::DiscLock::lock() { DiscLock1.set(false); }
+// const void Robot::Catapult::AngleRelease() {
+//   Catapult1.spin(reverse, 100, pct);
+//   // Catapult1.spinFor(reverse, , deg);
+//   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing())
+//   {
+//     // printf("limit: %ld", CatapultLimitSwitch.pressing());
+//     printf("release 1, limit:%ld\n", CatapultLimitSwitch.pressing());
+//     wait(5, msec);
+//   }
+//   while (CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+//     printf("release 2, limit:%ld\n", CatapultLimitSwitch.pressing());
+//     // printf("limit: %ld", CatapultLimitSwitch.pressing());
+//     // printf("release 2\n");
+//     wait(5, msec);
+//   }
+//   Catapult1.stop();
+//   wait(50, msec);
+//   CataAngler.set(true);
+//   wait(100, msec);
+//   CataAngler.set(false);
+// }
 const void Robot::Catapult::release() {
-  Catapult1.spin(reverse, 100, pct);
+  Catapult1.spin(reverse, 12, volt);
+  Robot::DiscLock::unlock();
   // Catapult1.spinFor(reverse, , deg);
   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
@@ -98,7 +95,7 @@ const void Robot::Catapult::release() {
   Catapult1.stop();
 }
 const void Robot::Catapult::retract() {
-  Catapult1.spin(reverse, 100, pct);
+  Catapult1.spin(reverse, 12, volt);
   // Catapult1.spin(reverse, 100, pct);
   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
     printf("retract, limit:%ld\n", CatapultLimitSwitch.pressing());
@@ -107,6 +104,7 @@ const void Robot::Catapult::retract() {
     wait(5, msec);
   }
   Catapult1.stop();
+  Robot::DiscLock::lock();
 }
 // bool shooting = true;
 static bool shooting = false;
@@ -115,26 +113,21 @@ const void Robot::Actions::shoot(const enum Robot::GOAL goal) {
     shooting = true;
     Robot::Actions::stopIntake();
     thread([]() {
-      Robot::DiscLock::unlocked();
       Robot::Catapult::release();
       Robot::Catapult::retract();
-      Robot::DiscLock::locked();
-      // Catapult1.spinFor(reverse, 1080, degrees);
       shooting = false;
     });
   }
 };
 
 const void Robot::Actions::AngleShoot(const enum Robot::GOAL goal) {
-  if (!shooting && !Controller1.ButtonX.pressing()) {
+  if (!shooting && !Controller1.ButtonY.pressing()) {
     shooting = true;
     Robot::Actions::stopIntake();
     thread([]() {
-      Robot::DiscLock::unlocked();
-      Robot::Catapult::AngleRelease();
+      Robot::Catapult::release();
+      CataAngler.set(true);
       Robot::Catapult::retract();
-      Robot::DiscLock::locked();
-      // Catapult1.spinFor(reverse, 1080, degrees);
       shooting = false;
     });
   }
@@ -155,21 +148,11 @@ const void Robot::Actions::AngleShoot(const enum Robot::GOAL goal) {
 //   });
 // };
 const void Robot::Actions::intake() {
-  // if (CatapultLimitSwitch.pressing() && !shooting) {
-  // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
-  Intake.spin(fwd, 12, volt);
-  // }
+  if (getFailSafe() || (CatapultLimitSwitch.pressing() && !shooting))
+    Intake.spin(fwd, 12, volt);
 };
-const void Robot::Actions::outtake() {
-  // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
-  Intake.spin(reverse, 12, volt);
-  // PTORight.spin(reverse, 30, pct);
-};
-const void Robot::Actions::stopIntake() {
-  // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
-  Intake.stop();
-  // PTORight.stop();
-};
+const void Robot::Actions::outtake() { Intake.spin(reverse, 12, volt); };
+const void Robot::Actions::stopIntake() { Intake.stop(); };
 
 const void Robot::Actions::expand() {
   ExpansionPiston.set(true);
@@ -277,31 +260,58 @@ void visionAidedRoller() {
   Intake.stop();
   // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
   spinningRoller = true;
-  const auto startTime = vex::timer::system();
-  Intake.spin(fwd, 25, pct);
-  if (whatIsRoller() == Robot::team)
-    wait(250, msec);
-  while (!(whatIsRoller() == Robot::team) /* 1 */) {
-    if (Controller1.ButtonY.pressing())
-      break;
-    if (vex::timer::system() - startTime > 2000)
-      break;
-    // printf("time:: %i", vex::timer::system() - startTime > 2000);
-    // whatIsRoller();
-    // printf("%d", whatIsRoller());
-    // printf("vision roller\n");
-    wait(10, msec);
+  if (RollerSensor.installed()) {
+    const auto startTime = vex::timer::system();
+    // Intake.spin(fwd, 25, pct);
+    Intake.spin(fwd, 100, pct);
+    // if (whatIsRoller() == Robot::team)
+    //   // wait(250, msec);
+    //   wait(100, msec);
+    while ((whatIsRoller() == Robot::team) && !Controller1.ButtonY.pressing() &&
+           (vex::timer::system() - startTime < 2000))
+      wait(10, msec);
+    while (!(whatIsRoller() == Robot::team) &&
+           !Controller1.ButtonY.pressing() &&
+           (vex::timer::system() - startTime < 2000))
+      wait(10, msec);
+
+    // wait(300, msec);
+    // wait(75, msec);
+    // RollerSensor.setLightPower(0, pct);
+  } else {
+    Intake.setVelocity(100, pct);
+    Intake.spinFor(fwd, 1, turns);
   }
-  wait(300, msec);
-  // if (!(whatIsRoller() == Robot::team))
-  //   visionAidedRoller();
   Intake.stop();
   spinningRoller = false;
-  // RollerSensor.setLightPower(0, pct);
 };
 
 } // namespace roller
-const void Robot::Actions::roller() { roller::visionAidedRoller(); };
+void Robot::Actions::roller() { roller::visionAidedRoller(); };
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Vision Sensor Roller End
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//      Input Listeners Start
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// void Robot::InputListeners::leftDrive(int) {
+//   Robot::Drivetrain::left(driveCoefficent *
+//                           pow((float)Controller1.Axis3.position() / 100, 5));
+// };
+// void Robot::InputListeners::rightDrive(int) {
+//   Robot::Drivetrain::right(driveCoefficent *
+//                            pow((float)Controller1.Axis2.position() / 100, 5));
+// };
+// void Robot::InputListeners::shoot() {
+//   Robot::Actions::shoot((Robot::GOAL)(int)Robot::team);
+// };
+// void Robot::InputListeners::roller() { Robot::Actions::roller(); };
+// void Robot::InputListeners::intake();
+// void Robot::InputListeners::outake();
+// void Robot::InputListeners::expand();
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//       Input Listeners End
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
