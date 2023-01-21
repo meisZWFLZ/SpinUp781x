@@ -7,7 +7,7 @@
 
 namespace auton {
 struct RecordingUnit {
-  unsigned int timeSinceLastUnit : 8;
+  unsigned int timeSinceLastUnit : 16;
   signed int left : 8;
   signed int right : 8;
   unsigned int shoot : 1;  // L1
@@ -38,7 +38,8 @@ public:
   Recorder() = delete;
   static void start();
   static void stop();
-  static void save(char *path);
+  static void save(const char *path);
+  static void saveNew();
 };
 } // namespace auton
 

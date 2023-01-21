@@ -95,6 +95,7 @@ public:
     static const void goTo(const Position pos); // to do
   };
   class InputListeners {
+    public:
     static void leftDrive(int);
     static void rightDrive(int);
     static void shoot();

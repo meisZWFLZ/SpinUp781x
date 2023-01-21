@@ -1,4 +1,7 @@
 #include "auton/record.h"
+#include "auton/recordPaths.h"
+#include <algorithm>
+#include <sstream>
 
 using namespace auton;
 
@@ -17,19 +20,27 @@ void RecordingUnit::deserialize(RecordingUnit &unit, std::istream &in) {
 }
 
 void Recorder::start() {
-  if (Recorder::loopTask == nullptr)
+  if (Recorder::loopTask != nullptr) {
+    // Recorder::stop();
+    Recorder::loopTask->suspend();
+    Recorder::saveNew();
+    Recorder::recordingUnits = std::forward_list<RecordingUnit *>();
+    Recorder::loopTask->resume();
+  } else
     Recorder::loopTask = new vex::task(Recorder::recordingLoop);
 }
 
 void Recorder::stop() {
   if (Recorder::loopTask != nullptr)
     Recorder::loopTask->stop();
+  loopTask = nullptr;
 }
 
-void Recorder::save(char *path) {
+void Recorder::save(const char *path) {
+  RecordingPaths::add(path);
   std::ofstream myfile(path, std::ofstream::binary);
   if (myfile.is_open()) {
-    Recorder::recordingUnits.reverse();
+    // Recorder::recordingUnits.reverse();
     for (auto unit : recordingUnits) {
       if (!myfile)
         break;
@@ -41,6 +52,17 @@ void Recorder::save(char *path) {
     printf("Couldn't open file\n");
   }
 }
+void Recorder::saveNew() {
+  std::stringstream ss;
+  if (!RecordingPaths::get().empty())
+    ss << std::max(RecordingPaths::get().size(),
+                   (unsigned)atoi(RecordingPaths::get().back().c_str())) +
+              1;
+  else
+    ss << RecordingPaths::get().size();
+  // ss << atoi(RecordingPaths::get().back().c_str()) + 1;
+  save(ss.str().c_str());
+};
 
 namespace recordingLoopStuff {
 
@@ -115,8 +137,10 @@ struct ControllerValues {
     auto unit = new RecordingUnit();
 
     unit->timeSinceLastUnit = timeSinceLastUnit;
-    unit->right = curr->right - last->right;
-    unit->left = curr->left - last->left;
+    // unit->right = curr->right - last->right;
+    // unit->left = curr->left - last->left;
+    unit->right = curr->right;
+    unit->left = curr->left;
     unit->shoot = curr->checkShoot(last);
     unit->roller = curr->checkRoller(last);
     unit->intake = curr->checkIntake(last);
@@ -133,19 +157,22 @@ int Recorder::recordingLoop() {
   ControllerValues *last = new ControllerValues();
   ControllerValues *curr;
   printf("loop starting2\n");
-  int i = 0;
-  int lastI = 0; // iteration of last RecordingUnit
+  // int i = 0;
+  // int lastI = 0; // iteration of last RecordingUnit
+  int lastTime = getTime();
   while (1) {
     curr = ControllerValues::get();
-    printf("loop iteration: %i\n", i);
+    printf("loop iteration: %i\n", getTime());
     if (ControllerValues::compare(last, curr)) {
       printf("new vals\n");
       Recorder::recordingUnits.push_front(
-          ControllerValues::toRecordingUnit(last, curr, i - lastI));
-      lastI = i;
+          // ControllerValues::toRecordingUnit(last, curr, i - lastI));
+          ControllerValues::toRecordingUnit(last, curr, getTime() - lastTime));
+      // lastI = i;
+      lastTime = getTime();
     };
     last = curr;
-    i++;
+    // i++;
     task::sleep(Recorder::iterationLength);
   };
   return 1;

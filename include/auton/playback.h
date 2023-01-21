@@ -8,17 +8,17 @@ class Player {
 private:
   static void playRecordingUnit(RecordingUnit *);
   static int playbackLoop();
-  static vex::task *loopTask;
+  vex::task *loopTask;
 
-  static std::forward_list<RecordingUnit *> recordingUnits;
+  /* static */ std::forward_list<RecordingUnit *> recordingUnits;
 
 public:
-  static constexpr int iterationLength = 50; // ms
-
-  Player() = delete;
-  static void start();
-  static void stop();
-  static void load(char *path);
+  // static constexpr int iterationLength = 50; // ms
+  // Player() = delete;
+  Player(const char *path);
+  /* static  */ void start();
+  /* static  */ void stop();
+  // /* static  */ void load(char *path);
 };
 
 } // namespace auton

@@ -296,21 +296,30 @@ void Robot::Actions::roller() { roller::visionAidedRoller(); };
 //      Input Listeners Start
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// void Robot::InputListeners::leftDrive(int) {
-//   Robot::Drivetrain::left(driveCoefficent *
-//                           pow((float)Controller1.Axis3.position() / 100, 5));
-// };
-// void Robot::InputListeners::rightDrive(int) {
-//   Robot::Drivetrain::right(driveCoefficent *
-//                            pow((float)Controller1.Axis2.position() / 100, 5));
-// };
-// void Robot::InputListeners::shoot() {
-//   Robot::Actions::shoot((Robot::GOAL)(int)Robot::team);
-// };
-// void Robot::InputListeners::roller() { Robot::Actions::roller(); };
-// void Robot::InputListeners::intake();
-// void Robot::InputListeners::outake();
-// void Robot::InputListeners::expand();
+void Robot::InputListeners::leftDrive(int axis) {
+  Robot::Drivetrain::left(getDriveCoefficent() * pow((float)axis / 100, 5));
+};
+void Robot::InputListeners::rightDrive(int axis) {
+  Robot::Drivetrain::right(getDriveCoefficent() * pow((float)axis / 100, 5));
+};
+void Robot::InputListeners::shoot() {
+  Robot::Actions::shoot((Robot::GOAL)(int)Robot::team);
+};
+void Robot::InputListeners::roller() { Robot::Actions::roller(); };
+
+void Robot::InputListeners::intake() {
+  if (Intake.voltage(volt) > 0.1)
+    Robot::Actions::stopIntake();
+  else
+    Robot::Actions::intake();
+};
+void Robot::InputListeners::outake() {
+  if (Intake.voltage(volt) < -0.1)
+    Robot::Actions::stopIntake();
+  else
+    Robot::Actions::outtake();
+};
+void Robot::InputListeners::expand() { Robot::Actions::expand(); };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //       Input Listeners End
