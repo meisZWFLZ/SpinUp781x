@@ -6,6 +6,9 @@ VERBOSE = 0
 # include toolchain options
 include vex/mkenv.mk
 
+INCLUDE = -I json/single_include/nlohmann/
+LIB = -L/path/to/mylib/lib
+
 # location of the project source cpp and c files
 SRC_C  = $(wildcard src/*.cpp) 
 SRC_C += $(wildcard src/*.c)

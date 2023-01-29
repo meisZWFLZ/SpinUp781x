@@ -97,11 +97,11 @@ Position OdomTracking::findDeltaPosition() {
   return {findDeltaX(deltaTheta), findDeltaY(deltaTheta), deltaTheta};
 };
 
-double OdomTracking::findTravelX(const Position &deltaPos) {
-  // bad vector rotation
-  double meanDTheta = data.last.yaw + (deltaPos.heading / 2);
-  return (deltaPos.x * cos(-meanDTheta)) - (deltaPos.y * sin(-meanDTheta));
-};
+// double OdomTracking::findTravelX(const Position &deltaPos) {
+//   // bad vector rotation
+//   double meanDTheta = data.last.yaw + (deltaPos.heading / 2);
+//   return (deltaPos.x * cos(-meanDTheta)) - (deltaPos.y * sin(-meanDTheta));
+// };
 
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
 float Q_rsqrt(float number) {
@@ -152,11 +152,11 @@ OdomTracking::findTravelCoord(const Position &deltaPos) {
 
   // stole from pilons:
   // https://github.com/nickmertin/5225A-2017-2018/blob/master/src/auto.c
-  const float globalAngle = data.curr.yaw - (deltaPos.heading / 2);
+  const float globalAngle = data.curr.yaw - (deltaPos.heading / 2); // dont get rid of that you silly
   float cosP = cos(globalAngle);
   float sinP = sin(globalAngle);
   return {(deltaPos.y * sinP) + (deltaPos.x * cosP),
-          (deltaPos.y * cosP) + (deltaPos.x * -sinP)};
+          (deltaPos.y * cosP) - (deltaPos.x * sinP)};
 };
 
 double OdomTracking::findTravelY(const Position &deltaPos) {
@@ -244,24 +244,25 @@ const Position Robot::getPosition() { return trackers[0]->getRobotPosition(); };
 
 void trackerLoop() {
   OdomTracking *tracker = trackers[trackers.size() - 1];
+  // printf("aaaaaaah: %d\n", trackers.size() - 1);
   // int lastMsec = 0 /* timer::system() */;
   // int time = 0;
   // int index = 0;
   // float runningAve = 0;
   while (1) {
     tracker->updateEncoderInches();
-    if (changeCheck(tracker->encoderInches[0], 0.01) ||
-        changeCheck(tracker->encoderInches[1], 0.01) ||
-        changeCheck(tracker->data.delta().getInertial(), 0.0001)) {
+    // if (changeCheck(tracker->encoderInches[0], 0.01) ||
+    //     changeCheck(tracker->encoderInches[1], 0.01) ||
+    //     changeCheck(tracker->data.delta().getInertial(), 0.0001)) {
+    // printf("what did you do neil!? %f\n", Robot::getPosition().heading);
+    // lastMsec = timer::system();
+    tracker->updateSnapshot(tracker->findRobotPosition());
+    // time = timer::system();
+    // runningAve = runningAve * index / (index + 1) + (time - lastMsec) /
+    // index; index++; printf("%d\n", time - lastMsec);
 
-      // lastMsec = timer::system();
-      tracker->updateSnapshot(tracker->findRobotPosition());
-      // time = timer::system();
-      // runningAve = runningAve * index / (index + 1) + (time - lastMsec) /
-      // index; index++; printf("%d\n", time - lastMsec);
-
-    } else
-      tracker->data.noChangeUpdate();
+    // } else
+    //   tracker->data.noChangeUpdate();
 
     wait(OdomTracking::WAIT_TIME, msec);
   }

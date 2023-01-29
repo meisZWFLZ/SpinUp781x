@@ -25,7 +25,7 @@ public:
   public:
     static constexpr float driveWheelRadius = 2.75 / 2;
     static constexpr double driveGearRatio =
-        2 / 3; // 2 turns of wheel to 3 turns of rotation sensor 
+        3 / 4; // 3 turns of wheel to 4 turns of rotation sensor
     static constexpr float encoderWheelRadius = 2.75 / 2;
   };
   class Encoders {
@@ -58,8 +58,8 @@ public:
   static inertial inertialSensor;
   class Drivetrain {
   public:
-    static motor_group* Left;
-    static motor_group* Right;
+    static motor_group *Left;
+    static motor_group *Right;
     static const void left(const float pct);
     static const void right(const float pct);
   };
@@ -70,7 +70,14 @@ public:
   public:
     static const void retract();
     static const void release();
+    // static const void AngleRelease();
   };
+  class DiscLock {
+  public:
+    static const void lock();
+    static const void unlock();
+  };
+
   // enum class PTO_STATE : bool { DRIVE, INTAKE };
   // static enum PTO_STATE PTOState;
   enum class CATAPULT_STATE : bool { UP, DOWN };
@@ -78,13 +85,24 @@ public:
   public:
     // static const void keepCataDown();
     static const void shoot(const Robot::GOAL);
+    static const void AngleShoot(const Robot::GOAL);
     static const void intake();
     static const void outtake();
     static const void stopIntake();
-    static const void roller(); // to do
+    static void roller();       // to do
     static const void expand(); // to do
     // static const void pto(const Robot::PTO_STATE state);
     static const void goTo(const Position pos); // to do
+  };
+  class InputListeners {
+    public:
+    static void leftDrive(int);
+    static void rightDrive(int);
+    static void shoot();
+    static void roller();
+    static void intake();
+    static void outake();
+    static void expand();
   };
   static const Position getPosition();
   static const CATAPULT_STATE catapultState();

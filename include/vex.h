@@ -7,6 +7,9 @@
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 //
+
+#ifndef VEX_H
+#define VEX_H
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,6 +20,11 @@
 
 #include "robot-config.h"
 
+static competition Competition = {};
+
+extern bool getFailSafe();
+extern int getDriveCoefficent();
+
 #define waitUntil(condition)                                                   \
   do {                                                                         \
     wait(5, msec);                                                             \
@@ -24,3 +32,5 @@
 
 #define repeat(iterations)                                                     \
   for (int iterator = 0; iterator < iterations; iterator++)
+
+#endif
