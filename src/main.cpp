@@ -1,3 +1,67 @@
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller
+// Inertial10           inertial      15
+// CatapultLimitSwitch  limit         A
+// ExpansionPiston      digital_out   H
+// LeftDriveA           motor         12
+// LeftDriveB           motor         10
+// LeftDriveC           motor         11
+// RightDriveA          motor         19
+// RightDriveB          motor         18
+// RightDriveC          motor         20
+// LeftDriveR           rotation      1
+// RightDriveR          rotation      2
+// HoriR                rotation      3
+// RollerSensor         optical       13
+// DiscLock1            digital_out   B
+// CataAngler           digital_out   E
+// Intake               motor_group   4, 5
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller
+// Inertial10           inertial      15
+// CatapultLimitSwitch  limit         A
+// ExpansionPiston      digital_out   H
+// LeftDriveA           motor         12
+// LeftDriveB           motor         10
+// LeftDriveC           motor         11
+// RightDriveA          motor         19
+// RightDriveB          motor         18
+// RightDriveC          motor         20
+// Catapult1            motor         9
+// LeftDriveR           rotation      1
+// RightDriveR          rotation      2
+// HoriR                rotation      3
+// RollerSensor         optical       13
+// DiscLock1            digital_out   B
+// CataAngler           digital_out   E
+// Intake               motor_group   4, 5
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller
+// Inertial10           inertial      15
+// CatapultLimitSwitch  limit         A
+// ExpansionPiston      digital_out   H
+// LeftDriveA           motor         12
+// LeftDriveB           motor         10
+// LeftDriveC           motor         11
+// RightDriveA          motor         19
+// RightDriveB          motor         18
+// RightDriveC          motor         20
+// Catapult1            motor         9
+// LeftDriveR           rotation      1
+// RightDriveR          rotation      2
+// HoriR                rotation      3
+// RollerSensor         optical       13
+// DiscLock1            digital_out   B
+// CataAngler           digital_out   E
+// ---- END VEXCODE CONFIGURED DEVICES ----
 #include "auton/action.h"
 #include "auton/elements.h"
 #include "auton/playback.h"
@@ -52,8 +116,8 @@ void motorSetup() {
   Robot::DiscLock::lock();
 
   // cata
-  Catapult1.setStopping(hold);
-  Catapult1.setVelocity(100, pct);
+  Intake.setStopping(coast);
+  Intake.setVelocity(100, pct);
 
   // drive groups
   Robot::Drivetrain::Left = new motor_group(LeftDriveA, LeftDriveB, LeftDriveC);
@@ -70,8 +134,7 @@ void motorSetup() {
 
 void expansionCheck() {
   // checks that all letter buttons are pressed
-  if (Controller1.ButtonA.pressing() && Controller1.ButtonX.pressing() &&
-      Controller1.ButtonY.pressing())
+  if (Controller1.ButtonX.pressing() && Controller1.ButtonY.pressing())
     Robot::InputListeners::expand();
 };
 
@@ -94,12 +157,12 @@ void driverControl() {
   //    START CATA TEST
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  // // disc lock
-  // Controller1.ButtonLeft.pressed([]() {
-  //   static bool state = false;
-  //   state = !state;
-  //   DiscLock1.set(state);
-  // });
+  // disc lock
+  Controller1.ButtonLeft.pressed([]() {
+    static bool state = false;
+    state = !state;
+    DiscLock1.set(state);
+  });
 
   // // angler
   // Controller1.ButtonRight.pressed([]() {
@@ -110,23 +173,24 @@ void driverControl() {
 
   // cata
   Controller1.ButtonUp.pressed([]() {
-    Catapult1.spin(fwd, 100, pct);
+    Intake.spin(fwd, 100, pct);
     while (Controller1.ButtonUp.pressing()) {
       wait(10, msec);
     }
-    Catapult1.stop();
+    Intake.stop();
   });
   Controller1.ButtonDown.pressed([]() {
-    Catapult1.spin(reverse, 100, pct);
+    Intake.spin(reverse, 100, pct);
     while (Controller1.ButtonDown.pressing()) {
       wait(10, msec);
     }
-    Catapult1.stop();
+    Intake.stop();
   });
 
   // intake failsafe
   // WARNING: might cause expansion not to fire (api may only call first
   // listener)
+
   Controller1.ButtonX.pressed([]() { failsafe = !failsafe; });
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -164,16 +228,31 @@ void driverControl() {
   // });
 
   // change direction
-  Controller1.ButtonB.pressed([]() { driveCoefficent *= -1; });
+  // Controller1.ButtonB.pressed([]() { driveCoefficent *= -1; });
 
   // roller
   Controller1.ButtonL2.pressed(Robot::InputListeners::roller);
   // Controller1.ButtonL2.pressed([] { Robot::Actions::roller(); });
 
   // expansion
-  Controller1.ButtonA.pressed(expansionCheck);
+  Controller1.ButtonA.pressed([] {
+    Robot::Catapult::retract();
+    Robot::DiscLock::lock();
+  });
   Controller1.ButtonX.pressed(expansionCheck);
   Controller1.ButtonY.pressed(expansionCheck);
+
+  while (1) {
+    if (!CatapultLimitSwitch.pressing() && !getFailSafe()) {
+      Robot::Catapult::retract();
+      Robot::DiscLock::lock();
+      // Catapult1.spin(fwd);
+      // while (!CatapultLimitSwitch.pressing())
+      //   wait(50, msec);
+      // Catapult1.stop();
+    }
+    wait(50, msec);
+  }
 }
 
 void preAuton() { AutonSelector::start(); }
@@ -352,8 +431,8 @@ void controllerDisplay() {
     // sstm2 << std::string("cata: ") << Catapult1.temperature(fahrenheit)
     //       << std::string(" F");
     Controller1.Screen.clearLine();
-    Controller1.Screen.print("cata: ");
-    Controller1.Screen.print(Catapult1.temperature(fahrenheit));
+    Controller1.Screen.print("cata/in: ");
+    Controller1.Screen.print(Intake.temperature(fahrenheit));
     Controller1.Screen.print(" F");
     Controller1.Screen.newLine();
 

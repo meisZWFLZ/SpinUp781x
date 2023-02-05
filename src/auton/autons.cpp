@@ -1,4 +1,6 @@
 #include "auton/autons.h"
+#include "auton/playback.h"
+#include "conversions.h"
 #include "robot.h"
 #include <cmath>
 
@@ -91,7 +93,7 @@ void driveDistance(float pct, float inches) {
 void leftAutonRoller() {
   // into roller
   // driveForStop(0.3, 400);
-  driveFor(-0.15,500);
+  driveFor(-0.15, 500);
   Robot::Actions::roller();
   driveStraight(0);
 }
@@ -159,27 +161,29 @@ void leftAuton6() {
 
 // non-roller side
 void rightAutonRoller() {
-  static constexpr float distance1 = 11.24 / 3;           // 17.27 inches
-  static constexpr float distance2 = 9.5 / (2.75 * M_PI); // 6 inches
+  static Player *player = new Player("b.txt");
+  player->start();
+  // static constexpr float distance1 = 11.24 / 3;           // 17.27 inches
+  // static constexpr float distance2 = 9.5 / (2.75 * M_PI); // 6 inches
 
-  LeftDriveA.setPosition(0, turns);
-  Robot::Drivetrain::left(0.2);
-  Robot::Drivetrain::right(0.2);
-  while (LeftDriveA.position(turns) < distance1)
-    wait(40, msec);
-  // printf("why neil be1\n");
-  turning2(280);
-  // printf("why neil be2\n");
-  LeftDriveA.setPosition(0, turns);
-  Robot::Drivetrain::left(-0.2);
-  Robot::Drivetrain::right(-0.2);
-  while (LeftDriveA.position(turns) < distance2)
-    wait(40, msec);
-    wait(500, msec);
-  // printf("why neil be3\n");
-  driveStraight(-0.15);
-  Robot::Actions::roller();
-  driveStraight(0);
+  // LeftDriveA.setPosition(0, turns);
+  // Robot::Drivetrain::left(0.2);
+  // Robot::Drivetrain::right(0.2);
+  // while (LeftDriveA.position(turns) < distance1)
+  //   wait(40, msec);
+  // // printf("why neil be1\n");
+  // turning2(280);
+  // // printf("why neil be2\n");
+  // LeftDriveA.setPosition(0, turns);
+  // Robot::Drivetrain::left(-0.2);
+  // Robot::Drivetrain::right(-0.2);
+  // while (LeftDriveA.position(turns) < distance2)
+  //   wait(40, msec);
+  //   wait(500, msec);
+  // // printf("why neil be3\n");
+  // driveStraight(-0.15);
+  // Robot::Actions::roller();
+  // driveStraight(0);
 }
 void rightAutonDiscs() {
   rightAutonRoller();
@@ -210,10 +214,66 @@ void rightAutonDiscs() {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void skillsAuton() {
-  leftAuton6();
+  // static constexpr int pidLimit = 50;
+  // static constexpr float target = Conversions::Degrees::toRadians(225);
 
+  leftAutonRoller();
+  driveForStop(0.3, 700);
+  turning2(225 - 180 - 10);
+  driveForStop(-0.3, 500);
   Robot::Actions::expand();
-}
+
+  // float robotHeading;
+  // float headingDiff = headingDifference(target, Inertial10.heading());
+
+  // while (std::abs(headingDiff) > 0.1) {
+  //   // if (Controller1.ButtonA.pressing())
+  //   //   break;
+
+  //   headingDiff = headingDifference(target, Inertial10.heading()) /*  * 100
+  //   */;
+
+  //   // printf("{heading: %f\n+diff: %f\n@target: %f\n", heading1,
+  //   //        headingDiff /*  / 100 */, target);
+  //   // pow(cos(headingDiff), 5) * 40 * distance / (2 + abs(distance));
+  //   const float turnAdjust = (20 * headingDiff / (0.5 +
+  //   std::abs(headingDiff)));
+
+  //   const float leftAdjustment = +turnAdjust;
+  //   const float rightAdjustment = -turnAdjust;
+
+  //   // printf("(%f,%f,%f)", robotPos.x, robotPos.y, robotPos.heading);
+
+  //   if (std::abs(leftAdjustment) < pidLimit) {
+  //     Robot::Drivetrain::left(leftAdjustment);
+  //     Robot::Drivetrain::right(rightAdjustment);
+  //   } else {
+  //     printf("both at limit: %f\n", leftAdjustment);
+  //     Robot::Drivetrain::left(leftAdjustment > 0 ? pidLimit : -pidLimit);
+  //     Robot::Drivetrain::right(rightAdjustment > 0 ? pidLimit : -pidLimit);
+  //   }
+
+  //   // Controller1.Screen.setCursor(0, 0);
+  //   // Controller1.Screen.clearLine();
+  //   // Controller1.Screen.print("(");
+  //   // Controller1.Screen.print(robotPos.x);
+  //   // Controller1.Screen.print(",");
+  //   // Controller1.Screen.print(robotPos.y);
+  //   // Controller1.Screen.print(",");
+  //   // Controller1.Screen.print(robotPos.heading);
+  //   // Controller1.Screen.print(")");
+  //   // Controller1.Screen.newLine();
+
+  //   wait(20, msec);
+
+  // robotPos = Robot::getPosition();
+  // distance = Position::distance(pos, robotPos);
+  // }
+  // Robot::Drivetrain::left(0);
+  // Robot::Drivetrain::right(0);
+
+  // Robot::Actions::expand();
+} // namespace auton
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //     Array Initialization

@@ -18,14 +18,15 @@ motor LeftDriveC = motor(PORT11, ratio6_1, true);
 motor RightDriveA = motor(PORT19, ratio6_1, false);
 motor RightDriveB = motor(PORT18, ratio18_1, false);
 motor RightDriveC = motor(PORT20, ratio6_1, false);
-motor Intake = motor(PORT16, ratio6_1, false);
-motor Catapult1 = motor(PORT9, ratio18_1, false);
 rotation LeftDriveR = rotation(PORT1, false);
 rotation RightDriveR = rotation(PORT2, false);
 rotation HoriR = rotation(PORT3, false);
 optical RollerSensor = optical(PORT13);
 digital_out DiscLock1 = digital_out(Brain.ThreeWirePort.B);
 digital_out CataAngler = digital_out(Brain.ThreeWirePort.E);
+motor IntakeMotorA = motor(PORT4, ratio18_1, false);
+motor IntakeMotorB = motor(PORT5, ratio18_1, true);
+motor_group Intake = motor_group(IntakeMotorA, IntakeMotorB);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

@@ -13,14 +13,13 @@ extern motor LeftDriveC;
 extern motor RightDriveA;
 extern motor RightDriveB;
 extern motor RightDriveC;
-extern motor Intake;
-extern motor Catapult1;
 extern rotation LeftDriveR;
 extern rotation RightDriveR;
 extern rotation HoriR;
 extern optical RollerSensor;
 extern digital_out DiscLock1;
 extern digital_out CataAngler;
+extern motor_group Intake;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
