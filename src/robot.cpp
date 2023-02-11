@@ -1,5 +1,6 @@
 #include "robot.h"
 #include "coordinate.h"
+#include "vex_rotation.h"
 
 // enum Robot::PTO_STATE Robot::PTOState = {Robot::PTO_STATE::INTAKE};
 enum Robot::TEAM Robot::team = Robot::TEAM::RED;
@@ -36,11 +37,14 @@ double Robot::Encoders::RotationSensor::position() {
   return rotationPtr->position(deg);
 };
 
-std::vector<Robot::Encoders::RotationSensor> Robot::Encoders::encoders = {
-    {&RightDriveR}, // right
-    {&LeftDriveR},  // left
-    {&HoriR}        // back
-};
+std::vector</* Robot::Encoders::RotationSensor */ rotation>
+    Robot::Encoders::encoders = {LeftDriveR, RightDriveR, HoriR};
+// {
+// {&RightDriveR}, // right
+// {&LeftDriveR},  // left
+// {&HoriR}        // back
+// };
+
 // const double Robot::Dimensions::wheelRadius = 2.75;
 
 constexpr double Ss = 0.75; // back
@@ -78,32 +82,33 @@ const void Robot::DiscLock::lock() { DiscLock1.set(false); }
 //   CataAngler.set(false);
 // }
 const void Robot::Catapult::release() {
-  Catapult1.spin(reverse, 12, volt);
+  Intake.spin(reverse, 12, volt);
   Robot::DiscLock::unlock();
   // Catapult1.spinFor(reverse, , deg);
   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
-    printf("release 1, limit:%ld\n", CatapultLimitSwitch.pressing());
+    // printf("release 1, limit:%ld\n", CatapultLimitSwitch.pressing());
     wait(5, msec);
   }
   while (CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
-    printf("release 2, limit:%ld\n", CatapultLimitSwitch.pressing());
+    // printf("release 2, limit:%ld\n", CatapultLimitSwitch.pressing());
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
     // printf("release 2\n");
     wait(5, msec);
   }
-  Catapult1.stop();
+  Intake.stop();
 }
 const void Robot::Catapult::retract() {
-  Catapult1.spin(reverse, 12, volt);
+  Robot::DiscLock::unlock();
+  Intake.spin(reverse, 12, volt);
   // Catapult1.spin(reverse, 100, pct);
   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
-    printf("retract, limit:%ld\n", CatapultLimitSwitch.pressing());
+    // printf("retract, limit:%ld\n", CatapultLimitSwitch.pressing());
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
     // printf("retract\n", CatapultLimitSwitch.pressing());
     wait(5, msec);
   }
-  Catapult1.stop();
+  Intake.stop();
   Robot::DiscLock::lock();
 }
 // bool shooting = true;

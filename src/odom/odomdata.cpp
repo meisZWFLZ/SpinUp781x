@@ -17,11 +17,14 @@ void OdomData::Data::update(Position pos1) {
   // Robot::Dimensions::encoderWheelRadius;
   yaw = Conversions::Degrees::toRadians(Robot::inertialSensor.heading(degrees));
   leftEnc = Conversions::Degrees::toRadians(
-      Robot::Encoders::encoders[Robot::Encoders::ENCODER::LEFT].position());
+      Robot::Encoders::encoders[Robot::Encoders::ENCODER::LEFT].position(
+          degrees));
   rightEnc = Conversions::Degrees::toRadians(
-      Robot::Encoders::encoders[Robot::Encoders::ENCODER::RIGHT].position());
+      Robot::Encoders::encoders[Robot::Encoders::ENCODER::RIGHT].position(
+          degrees));
   horiEnc = Conversions::Degrees::toRadians(
-      Robot::Encoders::encoders[Robot::Encoders::ENCODER::BACK].position());
+      Robot::Encoders::encoders[Robot::Encoders::ENCODER::BACK].position(
+          degrees));
 
   pos.x = pos1.x;
   pos.y = pos1.y;
@@ -136,11 +139,14 @@ OdomData::OdomData(const Position startPos) : last({{}}), curr({startPos}){};
 void OdomData::Data::noChangeUpdate() {
   yaw = Conversions::Degrees::toRadians(Robot::inertialSensor.heading(degrees));
   leftEnc = Conversions::Degrees::toRadians(
-      Robot::Encoders::encoders[Robot::Encoders::ENCODER::LEFT].position());
+      Robot::Encoders::encoders[Robot::Encoders::ENCODER::LEFT].position(
+          degrees));
   rightEnc = Conversions::Degrees::toRadians(
-      Robot::Encoders::encoders[Robot::Encoders::ENCODER::RIGHT].position());
+      Robot::Encoders::encoders[Robot::Encoders::ENCODER::RIGHT].position(
+          degrees));
   horiEnc = Conversions::Degrees::toRadians(
-      Robot::Encoders::encoders[Robot::Encoders::ENCODER::BACK].position());
+      Robot::Encoders::encoders[Robot::Encoders::ENCODER::BACK].position(
+          degrees));
 
   pos.heading = yaw;
 };

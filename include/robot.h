@@ -24,8 +24,8 @@ public:
   class Dimensions {
   public:
     static constexpr float driveWheelRadius = 2.75 / 2;
-    static constexpr double driveGearRatio =
-        3 / 4; // 3 turns of wheel to 4 turns of rotation sensor
+    static constexpr double driveGearRatio = 1;
+    // 3 / 4; // 3 turns of wheel to 4 turns of rotation sensor
     static constexpr float encoderWheelRadius = 2.75 / 2;
   };
   class Encoders {
@@ -52,7 +52,7 @@ public:
     };
     enum ENCODER { LEFT, RIGHT, BACK };
 
-    static std::vector<Robot::Encoders::RotationSensor> encoders;
+    static std::vector</* Robot::Encoders::RotationSensor */ rotation> encoders;
     static const std::vector<double> distanceToTrackingCenter;
   };
   static inertial inertialSensor;
@@ -95,7 +95,7 @@ public:
     static const void goTo(const Position pos); // to do
   };
   class InputListeners {
-    public:
+  public:
     static void leftDrive(int);
     static void rightDrive(int);
     static void shoot();
