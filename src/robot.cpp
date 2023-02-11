@@ -1,5 +1,6 @@
 #include "robot.h"
 #include "coordinate.h"
+#include "vex_rotation.h"
 
 // enum Robot::PTO_STATE Robot::PTOState = {Robot::PTO_STATE::INTAKE};
 enum Robot::TEAM Robot::team = Robot::TEAM::RED;
@@ -36,11 +37,14 @@ double Robot::Encoders::RotationSensor::position() {
   return rotationPtr->position(deg);
 };
 
-std::vector<Robot::Encoders::RotationSensor> Robot::Encoders::encoders = {
-    {&RightDriveR}, // right
-    {&LeftDriveR},  // left
-    {&HoriR}        // back
-};
+std::vector</* Robot::Encoders::RotationSensor */ rotation>
+    Robot::Encoders::encoders = {LeftDriveR, RightDriveR, HoriR};
+// {
+// {&RightDriveR}, // right
+// {&LeftDriveR},  // left
+// {&HoriR}        // back
+// };
+
 // const double Robot::Dimensions::wheelRadius = 2.75;
 
 constexpr double Ss = 0.75; // back

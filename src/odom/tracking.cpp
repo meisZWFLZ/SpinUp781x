@@ -1,6 +1,8 @@
 #include "odom/tracking.h"
 #include "conversions.h"
+#include "robot.h"
 #include "vex.h"
+#include "vex_units.h"
 #include <cmath>
 #include <functional>
 #include <string>
@@ -24,6 +26,7 @@ void OdomTracking::updateSnapshot(const Position robotPos) {
   //   Brain.Screen.newLine();
 };
 void OdomTracking::updateEncoderInches() {
+  // printf("y-enc:%f\n", data.getEncoder(Robot::Encoders::LEFT));
   encoderInches = {data.delta().getEncoderInches(Robot::Encoders::LEFT),
                    data.delta().getEncoderInches(Robot::Encoders::RIGHT),
                    data.delta().getEncoderInches(Robot::Encoders::BACK)};
@@ -46,12 +49,12 @@ double OdomTracking::findDeltaX(const double deltaTheta) {
   //         ((encoderInches[Robot::Encoders::LEFT] / deltaTheta) +
   //          Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::BACK]));
   // wait(3, msec);
-  return deltaTheta == 0
-             ? encoderInches[Robot::Encoders::BACK]
-             : ((2 * sin(deltaTheta / 2))) *
-                   ((encoderInches[Robot::Encoders::BACK] / deltaTheta) +
-                    Robot::Encoders::distanceToTrackingCenter
-                        [Robot::Encoders::BACK]);
+  return deltaTheta == 0 ? encoderInches[Robot::Encoders::BACK]
+                         : ((2 * sin(deltaTheta / 2))) *
+                               ((encoderInches[Robot::Encoders::BACK] /
+                                 deltaTheta) /*  +
+Robot::Encoders::distanceToTrackingCenter
+[Robot::Encoders::BACK] */);
 
   // // arc
   // return 2 * sin(data.getInertial() / 2) *
@@ -72,12 +75,14 @@ double OdomTracking::findDeltaY(const double deltaTheta) {
   //         ((encoderInches[Robot::Encoders::LEFT] / deltaTheta) +
   //          Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::LEFT]));
   // wait(3, msec);
-  return deltaTheta == 0
-             ? encoderInches[Robot::Encoders::LEFT]
-             : ((2 * sin(deltaTheta / 2))) *
-                   ((encoderInches[Robot::Encoders::LEFT] / deltaTheta) +
-                    Robot::Encoders::distanceToTrackingCenter
-                        [Robot::Encoders::LEFT]);
+  // if (encoderInches[Robot::Encoders::LEFT])
+  //   printf("y-enc:%f\n", encoderInches[Robot::Encoders::LEFT]);
+  return deltaTheta == 0 ? encoderInches[Robot::Encoders::LEFT]
+                         : ((2 * sin(deltaTheta / 2))) *
+                               ((encoderInches[Robot::Encoders::LEFT] /
+                                 deltaTheta) /*  +
+Robot::Encoders::distanceToTrackingCenter
+[Robot::Encoders::LEFT] */);
 
   // // arc
   // return 2 * sin(data.getInertial() / 2) *
@@ -93,7 +98,7 @@ double OdomTracking::findDeltaTheta() {
 };
 
 Position OdomTracking::findDeltaPosition() {
-  double deltaTheta = findDeltaTheta();
+  const double deltaTheta = findDeltaTheta();
   return {findDeltaX(deltaTheta), findDeltaY(deltaTheta), deltaTheta};
 };
 
@@ -151,8 +156,10 @@ OdomTracking::findTravelCoord(const Position &deltaPos) {
   // return {magnitude * sin(newAngle), magnitude * cos(newAngle)};
 
   // stole from pilons:
+
   // https://github.com/nickmertin/5225A-2017-2018/blob/master/src/auto.c
-  const float globalAngle = data.curr.yaw - (deltaPos.heading / 2); // dont get rid of that you silly
+  const float globalAngle =
+      data.curr.yaw + (deltaPos.heading / 2); // dont get rid of that you silly
   float cosP = cos(globalAngle);
   float sinP = sin(globalAngle);
   return {(deltaPos.y * sinP) + (deltaPos.x * cosP),
@@ -166,6 +173,7 @@ double OdomTracking::findTravelY(const Position &deltaPos) {
 
 Position OdomTracking::findRobotPosition() {
   auto coord = findTravelCoord(findDeltaPosition());
+  // printf("y:%f\n", coord.y);
   // printf(" -> (%f, %f)\n", coord.x, coord.y);
   Position robotPos1 = {coord.x, coord.y, 0};
   // auto deltaPos = findDeltaPosition();
@@ -240,7 +248,10 @@ inline constexpr bool changeCheck(const float diff, const float limit) {
 }
 
 std::vector<OdomTracking *> trackers = {};
-const Position Robot::getPosition() { return trackers[0]->getRobotPosition(); };
+Position absPos = {};
+const Position Robot::getPosition() {
+  return /* trackers[0]->getRobotPosition(); */ absPos;
+};
 
 void trackerLoop() {
   OdomTracking *tracker = trackers[trackers.size() - 1];
@@ -249,20 +260,64 @@ void trackerLoop() {
   // int time = 0;
   // int index = 0;
   // float runningAve = 0;
+  float lastVertEnc = 0, currVertEnc = 0, deltaVertEnc = 0, lastHoriEnc = 0,
+        deltaHoriEnc = 0, currHoriEnc = 0, lastHeading = 0, currHeading = 0,
+        deltaHeading = 0, arcRadiusVert = 0, arcRadiusHori = 0, cosP = 0,
+        sinP = 0;
+  Position relDeltaPos = {};
+  // Position absPos = {};
   while (1) {
-    tracker->updateEncoderInches();
-    // if (changeCheck(tracker->encoderInches[0], 0.01) ||
-    //     changeCheck(tracker->encoderInches[1], 0.01) ||
-    //     changeCheck(tracker->data.delta().getInertial(), 0.0001)) {
-    // printf("what did you do neil!? %f\n", Robot::getPosition().heading);
-    // lastMsec = timer::system();
-    tracker->updateSnapshot(tracker->findRobotPosition());
-    // time = timer::system();
-    // runningAve = runningAve * index / (index + 1) + (time - lastMsec) /
-    // index; index++; printf("%d\n", time - lastMsec);
+    currVertEnc =
+        Conversions::EncoderRadians::toInches(Conversions::Degrees::toRadians(
+            Robot::Encoders::encoders[Robot::Encoders::LEFT].position(deg)));
+    // currHoriEnc =
+    //     Conversions::EncoderRadians::toInches(Conversions::Degrees::toRadians(
+    //         Robot::Encoders::encoders[Robot::Encoders::RIGHT].position(deg)));
+    currHeading =
+        Conversions::Degrees::toRadians(Robot::inertialSensor.heading(deg));
 
-    // } else
-    //   tracker->data.noChangeUpdate();
+    deltaVertEnc = lastVertEnc - currVertEnc;
+    // deltaHoriEnc = lastHoriEnc - currHoriEnc;
+
+    if (deltaVertEnc) {
+      deltaHeading = lastHeading - currHeading;
+
+      arcRadiusVert = deltaHeading / deltaVertEnc;
+      // arcRadiusHori = deltaHeading / deltaHoriEnc;
+
+      relDeltaPos.x = -arcRadiusVert * (1 - cos(deltaHeading));
+      relDeltaPos.y = arcRadiusVert * sin(deltaHeading);
+
+      cosP = cos(lastHeading);
+      sinP = sin(lastHeading);
+
+      absPos.x += (relDeltaPos.y * cosP) - (relDeltaPos.x * sinP);
+      absPos.y += (relDeltaPos.y * cosP) - (relDeltaPos.x * sinP);
+    }
+    absPos.heading = currHeading;
+
+    printf("(x:%f,y:%f,yaw:%f)\n", relDeltaPos.x, relDeltaPos.y,
+           absPos.heading);
+
+    lastVertEnc = currVertEnc;
+    lastHoriEnc = currHoriEnc;
+    lastHeading = currHeading;
+
+    // tracker->updateEncoderInches();
+    // // if (changeCheck(tracker->encoderInches[0], 0.01) ||
+    // //     changeCheck(tracker->encoderInches[1], 0.01) ||
+    // //     changeCheck(tracker->data.delta().getInertial(), 0.0001)) {
+    // // printf("what did you do neil!? %f\n",
+    // Robot::getPosition().heading);
+    // // lastMsec = timer::system();
+    // tracker->updateSnapshot(tracker->findRobotPosition());
+    // // time = timer::system();
+    // // runningAve = runningAve * index / (index + 1) + (time - lastMsec)
+    // /
+    // // index; index++; printf("%d\n", time - lastMsec);
+
+    // // } else
+    // //   tracker->data.noChangeUpdate();
 
     wait(OdomTracking::WAIT_TIME, msec);
   }

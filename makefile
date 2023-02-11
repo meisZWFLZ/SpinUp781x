@@ -6,7 +6,6 @@ VERBOSE = 0
 # include toolchain options
 include vex/mkenv.mk
 
-INCLUDE = -I json/single_include/nlohmann/
 LIB = -L/path/to/mylib/lib
 
 # location of the project source cpp and c files
@@ -21,6 +20,7 @@ OBJ = $(addprefix $(BUILD)/, $(addsuffix .o, $(basename $(SRC_C))) )
 
 # location of include files that c and cpp files depend on
 SRC_H  = $(wildcard include/*.h)
+SRC_H  = $(wildcard include/*/*.h)
 
 # additional dependancies
 SRC_A  = makefile
