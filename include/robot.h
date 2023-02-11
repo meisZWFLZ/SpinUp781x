@@ -86,9 +86,9 @@ public:
     // static const void keepCataDown();
     static const void shoot(const Robot::GOAL);
     static const void AngleShoot(const Robot::GOAL);
-    static const void intake();
+    static void intake();
     static const void outtake();
-    static const void stopIntake();
+    static void stopIntake();
     static void roller();       // to do
     static const void expand(); // to do
     // static const void pto(const Robot::PTO_STATE state);

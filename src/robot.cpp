@@ -152,12 +152,12 @@ const void Robot::Actions::AngleShoot(const enum Robot::GOAL goal) {
 //     Robot::Catapult::retract();
 //   });
 // };
-const void Robot::Actions::intake() {
+void Robot::Actions::intake() {
   if (getFailSafe() || (CatapultLimitSwitch.pressing() && !shooting))
     Intake.spin(fwd, 12, volt);
 };
 const void Robot::Actions::outtake() { Intake.spin(reverse, 12, volt); };
-const void Robot::Actions::stopIntake() { Intake.stop(); };
+void Robot::Actions::stopIntake() { Intake.stop(); };
 
 const void Robot::Actions::expand() {
   ExpansionPiston.set(true);

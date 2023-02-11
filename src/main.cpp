@@ -145,7 +145,8 @@ void driverControl() {
   // Controller1.ButtonL1.pressed(shootListener);
 
   // intake toggle
-  Controller1.ButtonR1.pressed(Robot::InputListeners::intake);
+  Controller1.ButtonR1.pressed(Robot::Actions::intake);
+  Controller1.ButtonR1.released(Robot::InputListeners::intake);
 
   // Controller1.ButtonR1.pressed([]() {
   //   if (Intake.voltage(volt) > 0.1)
@@ -155,7 +156,7 @@ void driverControl() {
   // });
 
   // outtake toggle
-  Controller1.ButtonR2.pressed(Robot::InputListeners::outake);
+  // Controller1.ButtonR2.pressed(Robot::InputListeners::outake);
   // Controller1.ButtonR2.pressed([]() {
   //   if (Intake.voltage(volt) < -0.1)
   //     Robot::Actions::stopIntake();
@@ -178,17 +179,17 @@ void driverControl() {
   Controller1.ButtonX.pressed(expansionCheck);
   Controller1.ButtonY.pressed(expansionCheck);
 
-  while (1) {
-    if (!CatapultLimitSwitch.pressing() && !getFailSafe()) {
-      Robot::Catapult::retract();
-      Robot::DiscLock::lock();
-      // Catapult1.spin(fwd);
-      // while (!CatapultLimitSwitch.pressing())
-      //   wait(50, msec);
-      // Catapult1.stop();
-    }
-    wait(50, msec);
-  }
+  // while (1) {
+  //   if (!CatapultLimitSwitch.pressing() && !getFailSafe()) {
+  //     Robot::Catapult::retract();
+  //     Robot::DiscLock::lock();
+  //     // Catapult1.spin(fwd);
+  //     // while (!CatapultLimitSwitch.pressing())
+  //     //   wait(50, msec);
+  //     // Catapult1.stop();
+  //   }
+  //   wait(50, msec);
+  // }
 }
 
 void preAuton() { AutonSelector::start(); }
@@ -368,7 +369,7 @@ void controllerDisplay() {
     //       << std::string(" F");
     Controller1.Screen.clearLine();
     Controller1.Screen.print("cata/in: ");
-    Controller1.Screen.print(Intake.temperature(fahrenheit));
+    Controller1.Screen.print(Intake./*power(watt) */ temperature(fahrenheit));
     Controller1.Screen.print(" F");
     Controller1.Screen.newLine();
 
@@ -382,13 +383,14 @@ void controllerDisplay() {
     Position robotPos1 = Robot::getPosition();
     Brain.Screen.setCursor(1, 1);
     Brain.Screen.clearLine();
-    Brain.Screen.print("(");
-    Brain.Screen.print(robotPos1.x);
-    Brain.Screen.print(",");
-    Brain.Screen.print(robotPos1.y);
-    Brain.Screen.print(",");
-    Brain.Screen.print(robotPos1.heading);
-    Brain.Screen.print(")");
+    Brain.Screen.print((IntakeMotorA.power(watt)+IntakeMotorB.power(watt))/2);
+    // Brain.Screen.print("(");
+    // Brain.Screen.print(robotPos1.x);
+    // Brain.Screen.print(",");
+    // Brain.Screen.print(robotPos1.y);
+    // Brain.Screen.print(",");
+    // Brain.Screen.print(robotPos1.heading);
+    // Brain.Screen.print(")");
     Brain.Screen.newLine();
 
     // Controller1.Screen.clearLine();
