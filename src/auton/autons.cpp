@@ -139,19 +139,20 @@ void leftAuton3Low() {
   Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
   wait(500, msec);
 }
-void leftAuton3Low3In() {
-  leftAuton3Low();
+void leftAuton3Disc() {
+  leftAuton3Disc();
 
   // grab 3 stack
-  turning(220);
-  driveFor(0.6, 750);
-  driveStraight(0);
-  wait(500, msec);
+  driveForStop(0.3, 200);
+  Robot::Actions::roller();
+  wait(200, msec);
+  driveForStop(-0.3, 500);
+  turning2(0.3, 350);
+  driveForStop(0.5, 200);
   Robot::Actions::intake();
-  driveFor(0.3, 1500);
-  driveStraight(0);
-  wait(2500, msec);
-  Robot::Actions::stopIntake();
+ wait(200, msec);
+ Robot::Actions::stopIntake();
+
 }
 
 void leftAuton6() {
