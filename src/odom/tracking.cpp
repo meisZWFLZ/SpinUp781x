@@ -49,12 +49,16 @@ double OdomTracking::findDeltaX(const double deltaTheta) {
   //         ((encoderInches[Robot::Encoders::LEFT] / deltaTheta) +
   //          Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::BACK]));
   // wait(3, msec);
-  return deltaTheta == 0 ? encoderInches[Robot::Encoders::BACK]
-                         : ((2 * sin(deltaTheta / 2))) *
-                               ((encoderInches[Robot::Encoders::BACK] /
-                                 deltaTheta) /*  +
-Robot::Encoders::distanceToTrackingCenter
-[Robot::Encoders::BACK] */);
+  //   const float a =
+  //     (encoderInches[Robot::Encoders::BACK] / deltaTheta) +
+  //     Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::BACK];
+  // printf("radius:%f\n", a);
+  return deltaTheta == 0
+             ? encoderInches[Robot::Encoders::BACK]
+             : ((2 * sin(deltaTheta / 2))) * /*a*/
+                   ((encoderInches[Robot::Encoders::BACK] / deltaTheta) +
+                    Robot::Encoders::distanceToTrackingCenter
+                        [Robot::Encoders::BACK]);
 
   // // arc
   // return 2 * sin(data.getInertial() / 2) *
@@ -78,7 +82,7 @@ double OdomTracking::findDeltaY(const double deltaTheta) {
   // if (encoderInches[Robot::Encoders::LEFT])
   //   printf("y-enc:%f\n", encoderInches[Robot::Encoders::LEFT]);
   return deltaTheta == 0 ? encoderInches[Robot::Encoders::LEFT]
-                         : ((2 * sin(deltaTheta / 2))) *
+                         : 2 * sin(deltaTheta / 2) *
                                ((encoderInches[Robot::Encoders::LEFT] /
                                  deltaTheta) /*  +
 Robot::Encoders::distanceToTrackingCenter
@@ -248,9 +252,9 @@ inline constexpr bool changeCheck(const float diff, const float limit) {
 }
 
 std::vector<OdomTracking *> trackers = {};
-Position absPos = {};
+// Position absPos = {};
 const Position Robot::getPosition() {
-  return /* trackers[0]->getRobotPosition(); */ absPos;
+  return trackers[0]->getRobotPosition(); /* absPos ;*/
 };
 
 void trackerLoop() {
@@ -260,64 +264,64 @@ void trackerLoop() {
   // int time = 0;
   // int index = 0;
   // float runningAve = 0;
-  float lastVertEnc = 0, currVertEnc = 0, deltaVertEnc = 0, lastHoriEnc = 0,
-        deltaHoriEnc = 0, currHoriEnc = 0, lastHeading = 0, currHeading = 0,
-        deltaHeading = 0, arcRadiusVert = 0, arcRadiusHori = 0, cosP = 0,
-        sinP = 0;
-  Position relDeltaPos = {};
+  // float lastVertEnc = 0, currVertEnc = 0, deltaVertEnc = 0, lastHoriEnc = 0,
+  //       deltaHoriEnc = 0, currHoriEnc = 0, lastHeading = 0, currHeading = 0,
+  //       deltaHeading = 0, arcRadiusVert = 0, arcRadiusHori = 0, cosP = 0,
+  //       sinP = 0;
+  // Position relDeltaPos = {};
   // Position absPos = {};
   while (1) {
-    currVertEnc =
-        Conversions::EncoderRadians::toInches(Conversions::Degrees::toRadians(
-            Robot::Encoders::encoders[Robot::Encoders::LEFT].position(deg)));
-    // currHoriEnc =
+    // currVertEnc =
     //     Conversions::EncoderRadians::toInches(Conversions::Degrees::toRadians(
-    //         Robot::Encoders::encoders[Robot::Encoders::RIGHT].position(deg)));
-    currHeading =
-        Conversions::Degrees::toRadians(Robot::inertialSensor.heading(deg));
+    //         Robot::Encoders::encoders[Robot::Encoders::LEFT].position(deg)));
+    // // currHoriEnc =
+    // // Conversions::EncoderRadians::toInches(Conversions::Degrees::toRadians(
+    // // Robot::Encoders::encoders[Robot::Encoders::RIGHT].position(deg)));
+    // currHeading =
+    //     Conversions::Degrees::toRadians(Robot::inertialSensor.heading(deg));
 
-    deltaVertEnc = lastVertEnc - currVertEnc;
-    // deltaHoriEnc = lastHoriEnc - currHoriEnc;
+    // deltaVertEnc = lastVertEnc - currVertEnc;
+    // // deltaHoriEnc = lastHoriEnc - currHoriEnc;
 
-    if (deltaVertEnc) {
-      deltaHeading = lastHeading - currHeading;
+    // if (deltaVertEnc) {
+    //   deltaHeading = lastHeading - currHeading;
 
-      arcRadiusVert = deltaHeading / deltaVertEnc;
-      // arcRadiusHori = deltaHeading / deltaHoriEnc;
+    //   arcRadiusVert = deltaHeading / deltaVertEnc;
+    //   // arcRadiusHori = deltaHeading / deltaHoriEnc;
 
-      relDeltaPos.x = -arcRadiusVert * (1 - cos(deltaHeading));
-      relDeltaPos.y = arcRadiusVert * sin(deltaHeading);
+    //   relDeltaPos.x = -arcRadiusVert * (1 - cos(deltaHeading));
+    //   relDeltaPos.y = arcRadiusVert * sin(deltaHeading);
 
-      cosP = cos(lastHeading);
-      sinP = sin(lastHeading);
+    //   cosP = cos(lastHeading);
+    //   sinP = sin(lastHeading);
 
-      absPos.x += (relDeltaPos.y * cosP) - (relDeltaPos.x * sinP);
-      absPos.y += (relDeltaPos.y * cosP) - (relDeltaPos.x * sinP);
-    }
-    absPos.heading = currHeading;
+    //   absPos.x += (relDeltaPos.y * cosP) - (relDeltaPos.x * sinP);
+    //   absPos.y += (relDeltaPos.y * cosP) - (relDeltaPos.x * sinP);
+    // }
+    // absPos.heading = currHeading;
 
-    printf("(x:%f,y:%f,yaw:%f)\n", relDeltaPos.x, relDeltaPos.y,
-           absPos.heading);
+    // printf("(x:%f,y:%f,yaw:%f)\n", relDeltaPos.x, relDeltaPos.y,
+    //        absPos.heading);
 
-    lastVertEnc = currVertEnc;
-    lastHoriEnc = currHoriEnc;
-    lastHeading = currHeading;
+    // lastVertEnc = currVertEnc;
+    // lastHoriEnc = currHoriEnc;
+    // lastHeading = currHeading;
 
-    // tracker->updateEncoderInches();
-    // // if (changeCheck(tracker->encoderInches[0], 0.01) ||
-    // //     changeCheck(tracker->encoderInches[1], 0.01) ||
-    // //     changeCheck(tracker->data.delta().getInertial(), 0.0001)) {
-    // // printf("what did you do neil!? %f\n",
+    tracker->updateEncoderInches();
+    // if (changeCheck(tracker->encoderInches[0], 0.01) ||
+    //     changeCheck(tracker->encoderInches[1], 0.01) ||
+    //     changeCheck(tracker->data.delta().getInertial(), 0.0001)) {
+    // printf("what did you do neil!? %f\n",
     // Robot::getPosition().heading);
-    // // lastMsec = timer::system();
-    // tracker->updateSnapshot(tracker->findRobotPosition());
-    // // time = timer::system();
-    // // runningAve = runningAve * index / (index + 1) + (time - lastMsec)
+    // lastMsec = timer::system();
+    tracker->updateSnapshot(tracker->findRobotPosition());
+    // time = timer::system();
+    // runningAve = runningAve * index / (index + 1) + (time - lastMsec)
     // /
-    // // index; index++; printf("%d\n", time - lastMsec);
+    // index; index++; printf("%d\n", time - lastMsec);
 
-    // // } else
-    // //   tracker->data.noChangeUpdate();
+    // } else
+    //   tracker->data.noChangeUpdate();
 
     wait(OdomTracking::WAIT_TIME, msec);
   }

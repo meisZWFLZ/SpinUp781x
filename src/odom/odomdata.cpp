@@ -25,6 +25,8 @@ void OdomData::Data::update(Position pos1) {
   horiEnc = Conversions::Degrees::toRadians(
       Robot::Encoders::encoders[Robot::Encoders::ENCODER::BACK].position(
           degrees));
+  leftEnc += rightEnc;
+  leftEnc /= 4;
 
   pos.x = pos1.x;
   pos.y = pos1.y;

@@ -19,11 +19,13 @@ extern rotation HoriR;
 extern optical RollerSensor;
 extern digital_out DiscLock1;
 extern digital_out CataAngler;
+extern motor IntakeMotorA;
+extern motor IntakeMotorB;
 extern motor_group Intake;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
- * 
+ *
  * This should be called at the start of your int main function.
  */
-void  vexcodeInit( void );
+void vexcodeInit(void);
