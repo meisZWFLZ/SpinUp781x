@@ -78,7 +78,7 @@ void expansionCheck() {
 void controllerDisplay();
 
 void driverControl() {
-  thread([] { controllerDisplay(); });
+  // thread([] { controllerDisplay(); });
 
   // drivetrain
   // Controller1.Axis2.changed(&rightDriveSubscriber);
@@ -331,6 +331,8 @@ int main() {
 
   preAuton();
 
+  thread give_me_a_name([] { controllerDisplay(); });
+  
   while (1) {
     wait(1000, msec);
   }
@@ -383,14 +385,14 @@ void controllerDisplay() {
     Position robotPos1 = Robot::getPosition();
     Brain.Screen.setCursor(1, 1);
     Brain.Screen.clearLine();
-    Brain.Screen.print((IntakeMotorA.power(watt)+IntakeMotorB.power(watt))/2);
-    // Brain.Screen.print("(");
-    // Brain.Screen.print(robotPos1.x);
-    // Brain.Screen.print(",");
-    // Brain.Screen.print(robotPos1.y);
-    // Brain.Screen.print(",");
-    // Brain.Screen.print(robotPos1.heading);
-    // Brain.Screen.print(")");
+    // Brain.Screen.print((IntakeMotorA.power(watt)+IntakeMotorB.power(watt))/2);
+    Brain.Screen.print("(");
+    Brain.Screen.print(robotPos1.x);
+    Brain.Screen.print(",");
+    Brain.Screen.print(robotPos1.y);
+    Brain.Screen.print(",");
+    Brain.Screen.print(robotPos1.heading);
+    Brain.Screen.print(")");
     Brain.Screen.newLine();
 
     // Controller1.Screen.clearLine();
@@ -402,7 +404,7 @@ void controllerDisplay() {
     // Controller1.Screen.print(robotPos1.heading);
     // Controller1.Screen.print(")");
     // Controller1.Screen.newLine();
-
+printf("nail.com\n");
     wait(50, msec);
   }
 }

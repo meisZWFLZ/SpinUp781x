@@ -49,12 +49,16 @@ double OdomTracking::findDeltaX(const double deltaTheta) {
   //         ((encoderInches[Robot::Encoders::LEFT] / deltaTheta) +
   //          Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::BACK]));
   // wait(3, msec);
-  return deltaTheta == 0 ? encoderInches[Robot::Encoders::BACK]
-                         : ((2 * sin(deltaTheta / 2))) *
-                               ((encoderInches[Robot::Encoders::BACK] /
-                                 deltaTheta) /*  +
-Robot::Encoders::distanceToTrackingCenter
-[Robot::Encoders::BACK] */);
+  //   const float a =
+  //     (encoderInches[Robot::Encoders::BACK] / deltaTheta) +
+  //     Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::BACK];
+  // printf("radius:%f\n", a);
+  return deltaTheta == 0
+             ? encoderInches[Robot::Encoders::BACK]
+             : ((2 * sin(deltaTheta / 2))) * /*a*/
+                   ((encoderInches[Robot::Encoders::BACK] / deltaTheta) +
+                    Robot::Encoders::distanceToTrackingCenter
+                        [Robot::Encoders::BACK]);
 
   // // arc
   // return 2 * sin(data.getInertial() / 2) *
@@ -78,7 +82,7 @@ double OdomTracking::findDeltaY(const double deltaTheta) {
   // if (encoderInches[Robot::Encoders::LEFT])
   //   printf("y-enc:%f\n", encoderInches[Robot::Encoders::LEFT]);
   return deltaTheta == 0 ? encoderInches[Robot::Encoders::LEFT]
-                         : ((2 * sin(deltaTheta / 2))) *
+                         : 2 * sin(deltaTheta / 2) *
                                ((encoderInches[Robot::Encoders::LEFT] /
                                  deltaTheta) /*  +
 Robot::Encoders::distanceToTrackingCenter
@@ -271,8 +275,8 @@ void trackerLoop() {
     //     Conversions::EncoderRadians::toInches(Conversions::Degrees::toRadians(
     //         Robot::Encoders::encoders[Robot::Encoders::LEFT].position(deg)));
     // // currHoriEnc =
-    // //     Conversions::EncoderRadians::toInches(Conversions::Degrees::toRadians(
-    // //         Robot::Encoders::encoders[Robot::Encoders::RIGHT].position(deg)));
+    // // Conversions::EncoderRadians::toInches(Conversions::Degrees::toRadians(
+    // // Robot::Encoders::encoders[Robot::Encoders::RIGHT].position(deg)));
     // currHeading =
     //     Conversions::Degrees::toRadians(Robot::inertialSensor.heading(deg));
 

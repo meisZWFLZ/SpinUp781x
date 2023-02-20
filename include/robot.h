@@ -23,9 +23,9 @@ class Robot {
 public:
   class Dimensions {
   public:
-    static constexpr float driveWheelRadius = 2.75 / 2;
-    static constexpr double driveGearRatio = 1;
-    // 3 / 4; // 3 turns of wheel to 4 turns of rotation sensor
+    static constexpr float driveWheelRadius = 3.25 / 2;
+    static constexpr double driveGearRatio = /* 1; */
+        2.0F / 3.0F; // 2 turns of wheel to 3 turns of rotation sensor
     static constexpr float encoderWheelRadius = 2.75 / 2;
   };
   class Encoders {

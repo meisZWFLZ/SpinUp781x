@@ -47,11 +47,11 @@ std::vector</* Robot::Encoders::RotationSensor */ rotation>
 
 // const double Robot::Dimensions::wheelRadius = 2.75;
 
-constexpr double Ss = 0.75; // back
-constexpr double Sl = 5.75; // right
-constexpr double Sr = 5.75; // left
+constexpr double Ss = /* 8 */ 8.77629574888393; // back
+constexpr double Sl = 0;                        // right
+constexpr double Sr = 0;                        // left
 
-const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Sr, Sl,
+const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Sl, Sr,
                                                                        Ss};
 
 // void Robot::print(){};
@@ -285,7 +285,7 @@ void visionAidedRoller() {
     // RollerSensor.setLightPower(0, pct);
   } else {
     Intake.setVelocity(100, pct);
-    Intake.spinFor(fwd, 1, turns);
+    Intake.spinFor(fwd, 0.625, turns);
   }
   Intake.stop();
   spinningRoller = false;

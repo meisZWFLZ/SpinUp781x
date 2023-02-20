@@ -5,7 +5,7 @@ using signature = vision::signature;
 using code = vision::code;
 
 // A global instance of brain used for printing to the V5 Brain screen
-brain  Brain;
+brain Brain;
 
 // VEXcode device constructors
 controller Controller1 = controller(primary);
@@ -18,9 +18,9 @@ motor LeftDriveC = motor(PORT12, ratio6_1, false);
 motor RightDriveA = motor(PORT18, ratio6_1, false);
 motor RightDriveB = motor(PORT20, ratio18_1, false);
 motor RightDriveC = motor(PORT19, ratio6_1, true);
-rotation LeftDriveR = rotation(PORT5, false);
+rotation LeftDriveR = rotation(PORT4, true);
+rotation HoriR = rotation(PORT5, false);
 rotation RightDriveR = rotation(PORT6, false);
-rotation HoriR = rotation(PORT10, false);
 optical RollerSensor = optical(PORT8);
 digital_out DiscLock1 = digital_out(Brain.ThreeWirePort.B);
 digital_out CataAngler = digital_out(Brain.ThreeWirePort.E);
@@ -34,9 +34,9 @@ bool RemoteControlCodeEnabled = true;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
- * 
+ *
  * This should be called at the start of your int main function.
  */
-void vexcodeInit( void ) {
+void vexcodeInit(void) {
   // nothing to initialize
 }

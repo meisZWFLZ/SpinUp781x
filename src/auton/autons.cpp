@@ -13,8 +13,9 @@ namespace auton {
 static constexpr float pi2 = 2 * M_PI;
 constexpr float headingDifference(float a, float b) {
   const float diff = a - b;
-  return (diff +
-          pi2 * (diff > 0 ? (diff > M_PI ? -1 : 0) : diff < -M_PI ? 1 : 0));
+  return (diff + pi2 * (diff > 0       ? (diff > M_PI ? -1 : 0)
+                        : diff < -M_PI ? 1
+                                       : 0));
 }
 
 // ============
@@ -93,9 +94,14 @@ void driveDistance(float pct, float inches) {
 void leftAutonRoller() {
   // into roller
   // driveForStop(0.3, 400);
-  driveFor(-0.15, 500);
-  Robot::Actions::roller();
-  driveStraight(0);
+  // driveFor(-0.15, 500);
+  // Robot::Actions::roller();
+  // driveStraight(0);
+
+  Robot::Actions::goTo({84, -96, 0});
+
+  // Robot::Drivetrain::left(0.2);
+  // Robot::Drivetrain::right(-0.2);
 }
 void leftAuton3In() {
   leftAutonRoller();
