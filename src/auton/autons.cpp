@@ -147,16 +147,15 @@ void leftAuton3Disc() {
   Robot::Actions::roller();
   wait(200, msec);
   driveForStop(-0.3, 500);
-  turning2(0.3, 350);
+  turning2(350);
   driveForStop(0.5, 200);
   Robot::Actions::intake();
- wait(200, msec);
- Robot::Actions::stopIntake();
-
+  wait(200, msec);
+  Robot::Actions::stopIntake();
 }
 
 void leftAuton6() {
-  leftAuton3Low3In();
+  // leftAuton3Low3In();
   // shoot into low goal
   turning(130);
   Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
@@ -291,7 +290,7 @@ const std::vector<std::pair<const char *, const std::function<void(void)>>>
     autons = {{"Left Roller", leftAutonRoller},
               {"Left R 3Low", leftAuton3Low},
               {"Left 2R 3In", leftAuton2Roller},
-              {"Left R 3Low 3In", leftAuton3Low3In},
+              {"Left R 3Low 3In", leftAuton3Disc},
               {"Left R 6Low", leftAuton6},
               {"Right Roller", rightAutonRoller},
               {"Right R 3Low", rightAutonDiscs},
