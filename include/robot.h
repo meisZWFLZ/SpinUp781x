@@ -72,11 +72,17 @@ public:
     static const void release();
     // static const void AngleRelease();
   };
-  class DiscLock {
+  class PistonBoost {
   public:
-    static const void lock();
-    static const void unlock();
+    static void boost();
+    static void unBoost();
   };
+
+  // class DiscLock {
+  // public:
+  //   static const void lock();
+  //   static const void unlock();
+  // };
 
   // enum class PTO_STATE : bool { DRIVE, INTAKE };
   // static enum PTO_STATE PTOState;
@@ -85,7 +91,7 @@ public:
   public:
     // static const void keepCataDown();
     static const void shoot(const Robot::GOAL);
-    static const void AngleShoot(const Robot::GOAL);
+    static const void pistonShoot(const Robot::GOAL);
     static void intake();
     static const void outtake();
     static void stopIntake();
@@ -101,7 +107,7 @@ public:
     static void shoot();
     static void roller();
     static void intake();
-    static void outake();
+    static void outtake();
     static void expand();
   };
   static const Position getPosition();

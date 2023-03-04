@@ -25,31 +25,35 @@
 bool failsafe = 0;
 
 // for reversing drive
-int driveCoefficent = 1;
+int driveCoefficient = 1;
 
-int getDriveCoefficent() { return driveCoefficent; };
+int getDriveCoefficient() { return driveCoefficient; };
+
+/** intake failsafe (disables limit switch check)
+ @param failsafe 0 = safe
+ @param failsafe 1 = danger (limit switch check disabled) */
 bool getFailSafe() { return failsafe; }
 
 // drivetrain
 void leftDriveSubscriber() {
-  Robot::Drivetrain::left(driveCoefficent *
+  Robot::Drivetrain::left(driveCoefficient *
                           pow((float)Controller1.Axis3.position() / 100, 5));
 }
 void rightDriveSubscriber() {
-  Robot::Drivetrain::right(driveCoefficent *
+  Robot::Drivetrain::right(driveCoefficient *
                            pow((float)Controller1.Axis2.position() / 100, 5));
 }
 // shoot
 void shootListener() { Robot::Actions::shoot((Robot::GOAL)(int)Robot::team); }
-void angleshootListener() {
-  Robot::Actions::AngleShoot((Robot::GOAL)(int)Robot::team);
-}
+// void angleshootListener() {
+//   Robot::Actions::AngleShoot((Robot::GOAL)(int)Robot::team);
+// }
 void motorSetup() {
   // retract expansion
   ExpansionPiston.set(false);
 
   // disc lock
-  Robot::DiscLock::lock();
+  // Robot::DiscLock::lock();
 
   // cata
   Intake.setStopping(coast);
@@ -70,7 +74,7 @@ void motorSetup() {
 
 void expansionCheck() {
   // checks that all letter buttons are pressed
-  if (Controller1.ButtonX.pressing() && Controller1.ButtonY.pressing())
+  if (Controller1.ButtonB.pressing() && Controller1.ButtonLeft.pressing())
     Robot::InputListeners::expand();
 };
 
@@ -94,11 +98,11 @@ void driverControl() {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   // disc lock
-  Controller1.ButtonLeft.pressed([]() {
-    static bool state = false;
-    state = !state;
-    DiscLock1.set(state);
-  });
+  // Controller1.ButtonLeft.pressed([]() {
+  //   static bool state = false;
+  //   state = !state;
+  //   DiscLock1.set(state);
+  // });
 
   // // angler
   // Controller1.ButtonRight.pressed([]() {
@@ -168,16 +172,20 @@ void driverControl() {
   // Controller1.ButtonB.pressed([]() { driveCoefficent *= -1; });
 
   // roller
-  Controller1.ButtonL2.pressed(Robot::InputListeners::roller);
+  // Controller1.ButtonL2.pressed(Robot::InputListeners::roller);
+  Controller1.ButtonR2.pressed(Robot::InputListeners::roller);
   // Controller1.ButtonL2.pressed([] { Robot::Actions::roller(); });
 
+  Controller1.ButtonL2.pressed(
+      []() { Robot::Actions::pistonShoot(Robot::GOAL::MY_TEAM); });
   // expansion
   Controller1.ButtonA.pressed([] {
     Robot::Catapult::retract();
-    Robot::DiscLock::lock();
+    // Robot::DiscLock::lock();
   });
-  Controller1.ButtonX.pressed(expansionCheck);
-  Controller1.ButtonY.pressed(expansionCheck);
+  // Controller1.ButtonX.pressed(expansionCheck);
+  Controller1.ButtonLeft.pressed(expansionCheck);
+  Controller1.ButtonB.pressed(expansionCheck);
 
   // while (1) {
   //   if (!CatapultLimitSwitch.pressing() && !getFailSafe()) {
@@ -317,7 +325,7 @@ int main() {
   Robot::team = Robot::TEAM::RED;
 
   Inertial10.calibrate(2);
-  // wait until inertial finsished calibrating
+  // wait until inertial finished calibrating
   while (Inertial10.isCalibrating())
     wait(20, msec);
 
@@ -332,7 +340,7 @@ int main() {
   preAuton();
 
   thread give_me_a_name([] { controllerDisplay(); });
-  
+
   while (1) {
     wait(1000, msec);
   }
@@ -404,7 +412,7 @@ void controllerDisplay() {
     // Controller1.Screen.print(robotPos1.heading);
     // Controller1.Screen.print(")");
     // Controller1.Screen.newLine();
-printf("nail.com\n");
+    printf("nail.com\n");
     wait(50, msec);
   }
 }

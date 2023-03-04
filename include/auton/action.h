@@ -1,5 +1,5 @@
-#include "position.h"
-#include "robot.h"
+#include "../position.h"
+#include "../robot.h"
 #include <vector>
 
 namespace auton {

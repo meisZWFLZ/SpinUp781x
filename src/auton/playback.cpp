@@ -56,7 +56,7 @@ inline void Player::playRecordingUnit(RecordingUnit *unit) {
   if (unit->intake)
     Robot::InputListeners::intake();
   if (unit->outake)
-    Robot::InputListeners::outake();
+    Robot::InputListeners::outtake();
   if (unit->expand)
     Robot::InputListeners::expand();
 }

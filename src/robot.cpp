@@ -1,5 +1,6 @@
 #include "robot.h"
 #include "coordinate.h"
+#include "vex.h"
 #include "vex_rotation.h"
 
 // enum Robot::PTO_STATE Robot::PTOState = {Robot::PTO_STATE::INTAKE};
@@ -58,8 +59,8 @@ const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Sl, Sr,
 
 // 2.375 vert
 // 4.375
-const void Robot::DiscLock::unlock() { DiscLock1.set(true); }
-const void Robot::DiscLock::lock() { DiscLock1.set(false); }
+// const void Robot::DiscLock::unlock() { DiscLock1.set(true); }
+// const void Robot::DiscLock::lock() { DiscLock1.set(false); }
 // const void Robot::Catapult::AngleRelease() {
 //   Catapult1.spin(reverse, 100, pct);
 //   // Catapult1.spinFor(reverse, , deg);
@@ -81,9 +82,12 @@ const void Robot::DiscLock::lock() { DiscLock1.set(false); }
 //   wait(100, msec);
 //   CataAngler.set(false);
 // }
+void Robot::PistonBoost::boost() { PistonBooster.set(true); }
+void Robot::PistonBoost::unBoost() { PistonBooster.set(false); }
+
 const void Robot::Catapult::release() {
   Intake.spin(reverse, 12, volt);
-  Robot::DiscLock::unlock();
+  // Robot::DiscLock::unlock();
   // Catapult1.spinFor(reverse, , deg);
   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
@@ -99,17 +103,25 @@ const void Robot::Catapult::release() {
   Intake.stop();
 }
 const void Robot::Catapult::retract() {
-  Robot::DiscLock::unlock();
+  // Robot::DiscLock::unlock();
   Intake.spin(reverse, 12, volt);
   // Catapult1.spin(reverse, 100, pct);
-  while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+
+  const auto startTime = vex::timer::system();
+  while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing() &&
+         (vex::timer::system() - startTime) < 300) {
     // printf("retract, limit:%ld\n", CatapultLimitSwitch.pressing());
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
     // printf("retract\n", CatapultLimitSwitch.pressing());
     wait(5, msec);
   }
+  Robot::PistonBoost::unBoost();
+  while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
+    wait(5, msec);
+  }
   Intake.stop();
-  Robot::DiscLock::lock();
+  // Robot::DiscLock::lock();
+  Controller1.rumble(".");
 }
 // bool shooting = true;
 static bool shooting = false;
@@ -122,16 +134,17 @@ const void Robot::Actions::shoot(const enum Robot::GOAL goal) {
       Robot::Catapult::retract();
       shooting = false;
     });
+    // Controller1.rumble("-");
   }
 };
 
-const void Robot::Actions::AngleShoot(const enum Robot::GOAL goal) {
+const void Robot::Actions::pistonShoot(const enum Robot::GOAL goal) {
   if (!shooting && !Controller1.ButtonY.pressing()) {
     shooting = true;
     Robot::Actions::stopIntake();
     thread([]() {
+      Robot::PistonBoost::boost();
       Robot::Catapult::release();
-      CataAngler.set(true);
       Robot::Catapult::retract();
       shooting = false;
     });
@@ -302,10 +315,10 @@ void Robot::Actions::roller() { roller::visionAidedRoller(); };
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void Robot::InputListeners::leftDrive(int axis) {
-  Robot::Drivetrain::left(getDriveCoefficent() * pow((float)axis / 100, 5));
+  Robot::Drivetrain::left(getDriveCoefficient() * pow((float)axis / 100, 5));
 };
 void Robot::InputListeners::rightDrive(int axis) {
-  Robot::Drivetrain::right(getDriveCoefficent() * pow((float)axis / 100, 5));
+  Robot::Drivetrain::right(getDriveCoefficient() * pow((float)axis / 100, 5));
 };
 void Robot::InputListeners::shoot() {
   Robot::Actions::shoot((Robot::GOAL)(int)Robot::team);
@@ -318,13 +331,17 @@ void Robot::InputListeners::intake() {
   else
     Robot::Actions::intake();
 };
-void Robot::InputListeners::outake() {
+void Robot::InputListeners::outtake() {
   if (Intake.voltage(volt) < -0.1)
     Robot::Actions::stopIntake();
   else
     Robot::Actions::outtake();
 };
-void Robot::InputListeners::expand() { Robot::Actions::expand(); };
+void Robot::InputListeners::expand() {
+  if (!getFailSafe())
+    Robot::Catapult::release();
+  Robot::Actions::expand();
+};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //       Input Listeners End

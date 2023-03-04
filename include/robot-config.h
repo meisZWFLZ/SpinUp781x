@@ -18,7 +18,7 @@ extern rotation RightDriveR;
 extern rotation HoriR;
 extern optical RollerSensor;
 extern digital_out DiscLock1;
-extern digital_out CataAngler;
+extern digital_out PistonBooster;
 extern motor IntakeMotorA;
 extern motor IntakeMotorB;
 extern motor_group Intake;
