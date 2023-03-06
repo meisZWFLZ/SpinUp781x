@@ -4,6 +4,8 @@
 #include "robot.h"
 #include <cmath>
 
+#include "./auton/path.h"
+
 namespace auton {
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,10 +100,10 @@ void leftAutonRoller() {
   // Robot::Actions::roller();
   // driveStraight(0);
 
-  Robot::Actions::goTo({84, -96, 0});
-
-  // Robot::Drivetrain::left(0.2);
-  // Robot::Drivetrain::right(-0.2);
+  // Robot::Actions::goTo({84, -96, 0}, 1);
+  printf("start\n");
+  Robot::Drivetrain::left(0.5);
+  Robot::Drivetrain::right(-0.5);
 }
 void leftAuton3In() {
   leftAutonRoller();
@@ -284,16 +286,24 @@ void skillsAuton() {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //     Array Initialization
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Auton::Auton(const char *name) : name(name){};
+
+CallbackAuton::CallbackAuton(const char *name, void (*callback)(void))
+    : Auton(name), callback(callback) {}
+
+void CallbackAuton::execute() const { callback(); }
 
 void doNothing() { Brain.Screen.print("i should be doing nothing"); }
-const std::vector<std::pair<const char *, const std::function<void(void)>>>
-    autons = {{"Left Roller", leftAutonRoller},
-              {"Left R 3Low", leftAuton3Low},
-              {"Left 2R 3In", leftAuton2Roller},
-              {"Left R 3Low 3In", leftAuton3Low3In},
-              {"Left R 6Low", leftAuton6},
-              {"Right Roller", rightAutonRoller},
-              {"Right R 3Low", rightAutonDiscs},
-              {"Do Nothing", doNothing},
-              {"Skills", skillsAuton}};
+const std::vector<const Auton*> autons = {
+    new auton::Path("AutoGUI/brandonerd.vauto", "right roll gui"),
+    new CallbackAuton("Left Roller", leftAutonRoller),
+    new CallbackAuton("Left R 3Low", leftAuton3Low),
+    new CallbackAuton("Left 2R 3In", leftAuton2Roller),
+    new CallbackAuton("Left R 3Low 3In", leftAuton3Low3In),
+    new CallbackAuton("Left R 6Low", leftAuton6),
+    new CallbackAuton("Right Roller", rightAutonRoller),
+    new CallbackAuton("Right R 3Low", rightAutonDiscs),
+    new CallbackAuton("Do Nothing", doNothing),
+    new CallbackAuton("Skills", skillsAuton),
+};
 }; // namespace auton

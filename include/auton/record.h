@@ -1,4 +1,4 @@
-#include "vex.h"
+#include "../vex.h"
 #include <forward_list>
 #include <fstream>
 

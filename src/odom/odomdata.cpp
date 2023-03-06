@@ -15,7 +15,8 @@ void OdomData::Data::update(Position pos1) {
   //     Robot::Dimensions::driveWheelRadius * ;
   // static constexpr float encoderFactor =
   // Robot::Dimensions::encoderWheelRadius;
-  yaw = Conversions::Degrees::toRadians(Robot::inertialSensor.heading(degrees));
+  yaw =
+      Conversions::Degrees::toRadians(Robot::inertialSensor->heading(degrees));
   leftEnc = Conversions::Degrees::toRadians(
       Robot::Encoders::encoders[Robot::Encoders::ENCODER::LEFT].position(
           degrees));
@@ -26,7 +27,7 @@ void OdomData::Data::update(Position pos1) {
       Robot::Encoders::encoders[Robot::Encoders::ENCODER::BACK].position(
           degrees));
   leftEnc += rightEnc;
-  leftEnc /= 4;
+  leftEnc /= 2; // bro what
 
   pos.x = pos1.x;
   pos.y = pos1.y;
@@ -139,7 +140,8 @@ const std::array<double, 3> OdomData::DeltaData::getEncodersInches() const {
 OdomData::OdomData(const Position startPos) : last({{}}), curr({startPos}){};
 
 void OdomData::Data::noChangeUpdate() {
-  yaw = Conversions::Degrees::toRadians(Robot::inertialSensor.heading(degrees));
+  yaw =
+      Conversions::Degrees::toRadians(Robot::inertialSensor->heading(degrees));
   leftEnc = Conversions::Degrees::toRadians(
       Robot::Encoders::encoders[Robot::Encoders::ENCODER::LEFT].position(
           degrees));

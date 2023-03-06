@@ -55,7 +55,7 @@ public:
     static std::vector</* Robot::Encoders::RotationSensor */ rotation> encoders;
     static const std::vector<double> distanceToTrackingCenter;
   };
-  static inertial inertialSensor;
+  static inertial *inertialSensor;
   class Drivetrain {
   public:
     static motor_group *Left;
@@ -95,10 +95,13 @@ public:
     static void intake();
     static const void outtake();
     static void stopIntake();
-    static void roller();       // to do
-    static const void expand(); // to do
-    // static const void pto(const Robot::PTO_STATE state);
-    static const void goTo(const Position pos); // to do
+    static void roller();
+    static const void expand();
+    /** @param marginOfError in inches */
+    static const void goTo(const Position pos, const float marginOfError);
+    /** @param marginOfError in inches */
+    static const void goTo(const Coordinate coord, const float marginOfError);
+    static const void turnTo(const float heading);
   };
   class InputListeners {
   public:
@@ -111,6 +114,7 @@ public:
     static void expand();
   };
   static const Position getPosition();
+  static void setPosition(const Position);
   static const CATAPULT_STATE catapultState();
 };
 

@@ -1,4 +1,4 @@
-#include "auton/record.h"
+#include "../auton/record.h"
 
 #ifndef PLAYER_H
 #define PLAYER_H

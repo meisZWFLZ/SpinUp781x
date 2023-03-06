@@ -56,16 +56,16 @@ public:
   Wait(const int time);
   void execute() const override;
 };
-class Path : public Action {
-private:
-  const std::vector<const Action *> actions;
+// class Path : public Action {
+// private:
+//   const std::vector<const Action *> actions;
 
-public:
-  Path(const std::vector<const Action *> actions);
-  void execute() const override;
-};
-class IntakeDisc : public Path {
-  Wait waitAction;
-  IntakeDisc(int time);
-};
+// public:
+//   Path(const std::vector<const Action *> actions);
+//   void execute() const override;
+// };
+// class IntakeDisc : public Path {
+//   Wait waitAction;
+//   IntakeDisc(int time);
+// };
 } // namespace auton

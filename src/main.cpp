@@ -9,6 +9,7 @@
 #include "pid_controller.h"
 #include "position.h"
 #include "vex.h"
+#include "vex_imu.h"
 #include <atomic>
 #include <cmath>
 #include <fstream>
@@ -82,8 +83,9 @@ void expansionCheck() {
 void controllerDisplay();
 
 void driverControl() {
-  // thread([] { controllerDisplay(); });
-
+  thread([] { controllerDisplay(); });
+  Robot::setPosition({72, 72, Conversions::Degrees::toRadians(90)});
+  // Inertial10.setHeading(90, deg);
   // drivetrain
   // Controller1.Axis2.changed(&rightDriveSubscriber);
   // Controller1.Axis3.changed(&leftDriveSubscriber);
@@ -330,7 +332,9 @@ int main() {
     wait(20, msec);
 
   OdomTracking tracker1 = {{}};
+  Inertial10.setHeading(90, deg);
 
+  printf("deg:%f\n", Inertial10.heading(deg));
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //    START COMPETITION
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -339,7 +343,7 @@ int main() {
 
   preAuton();
 
-  thread give_me_a_name([] { controllerDisplay(); });
+  // thread give_me_a_name([] { controllerDisplay(); });
 
   while (1) {
     wait(1000, msec);
@@ -399,7 +403,7 @@ void controllerDisplay() {
     Brain.Screen.print(",");
     Brain.Screen.print(robotPos1.y);
     Brain.Screen.print(",");
-    Brain.Screen.print(robotPos1.heading);
+    Brain.Screen.print(Conversions::Radians::toDegrees(robotPos1.heading));
     Brain.Screen.print(")");
     Brain.Screen.newLine();
 
@@ -412,7 +416,7 @@ void controllerDisplay() {
     // Controller1.Screen.print(robotPos1.heading);
     // Controller1.Screen.print(")");
     // Controller1.Screen.newLine();
-    printf("nail.com\n");
+    // printf("nail.com\n");
     wait(50, msec);
   }
 }

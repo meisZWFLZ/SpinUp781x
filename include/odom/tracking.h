@@ -2,7 +2,7 @@
 #ifndef ODOM_TRACKING_H
 #define ODOM_TRACKING_H
 
-#include "odom/odomData.h"
+#include "../odom/odomData.h"
 #include <thread>
 
 using namespace std;

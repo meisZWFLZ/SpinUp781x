@@ -8,7 +8,7 @@ enum Robot::TEAM Robot::team = Robot::TEAM::RED;
 
 motor_group *Robot::Drivetrain::Left = nullptr;
 motor_group *Robot::Drivetrain::Right = nullptr;
-inertial Robot::inertialSensor = Inertial10;
+inertial *Robot::inertialSensor = &Inertial10;
 
 // Robot::Encoders::EncOrMotor::EncOrMotor(motor *motorPtr)
 //     : motorPtr(motorPtr), encoderPtr(nullptr), motorPtr2(nullptr),
@@ -48,9 +48,9 @@ std::vector</* Robot::Encoders::RotationSensor */ rotation>
 
 // const double Robot::Dimensions::wheelRadius = 2.75;
 
-constexpr double Ss = /* 8 */ 8.77629574888393; // back
-constexpr double Sl = 0;                        // right
-constexpr double Sr = 0;                        // left
+constexpr double Ss = /* 8 */ 6.671062958; // back
+constexpr double Sl = 0;                   // right
+constexpr double Sr = 0;                   // left
 
 const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Sl, Sr,
                                                                        Ss};

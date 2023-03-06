@@ -1,5 +1,6 @@
 #include "odom/tracking.h"
 #include "conversions.h"
+#include "position.h"
 #include "robot.h"
 #include "vex.h"
 #include "vex_units.h"
@@ -49,9 +50,8 @@ double OdomTracking::findDeltaX(const double deltaTheta) {
   //         ((encoderInches[Robot::Encoders::LEFT] / deltaTheta) +
   //          Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::BACK]));
   // wait(3, msec);
-  //   const float a =
-  //     (encoderInches[Robot::Encoders::BACK] / deltaTheta) +
-  //     Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::BACK];
+  // const float a = (encoderInches[Robot::Encoders::BACK] / deltaTheta)
+      /* + Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::BACK] */;
   // printf("radius:%f\n", a);
   return deltaTheta == 0
              ? encoderInches[Robot::Encoders::BACK]
@@ -255,6 +255,9 @@ std::vector<OdomTracking *> trackers = {};
 // Position absPos = {};
 const Position Robot::getPosition() {
   return trackers[0]->getRobotPosition(); /* absPos ;*/
+};
+void Robot::setPosition(const Position pos) {
+  return trackers[0]->reset(pos); /* absPos ;*/
 };
 
 void trackerLoop() {
