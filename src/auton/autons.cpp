@@ -125,9 +125,22 @@ void leftAuton3In() {
   driveForStop(-0.3, 400);
 }
 void leftAuton2Roller() {
-  leftAuton3In();
-  turning2(215);
-  driveForStop(-0.5, 3000);
+  driveFor(0.4,200);
+  Robot::Actions::roller();
+  wait(200,msec);
+  driveFor(0.0,0);
+  driveForStop(-0.4,400);
+  turning2(237);
+  Robot::Actions::pistonShoot(Robot::GOAL::MY_TEAM); 
+  wait(1000,msec);
+  turning2(297);
+  Robot::Actions::intake();
+  driveForStop(0.6,700);
+  Robot::Actions::intake();
+  wait(1500,msec);
+  Robot::Actions::stopIntake();
+  turning2(208);
+Robot::Actions::pistonShoot(Robot::GOAL::MY_TEAM);
 }
 void leftAuton3Low() {
   leftAuton3In();

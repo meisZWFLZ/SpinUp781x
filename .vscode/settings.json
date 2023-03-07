@@ -4,5 +4,6 @@
     "drivercontrol",
     "Hori",
     "vexcode"
-  ]
+  ],
+  "C_Cpp.errorSquiggles": "disabled"
 }
