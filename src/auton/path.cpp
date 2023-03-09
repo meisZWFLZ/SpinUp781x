@@ -32,9 +32,11 @@ void executeActions(const std::vector<ACTION> actions) {
       break;
     case ACTION::SHOOT:
       Robot::Actions::shoot(Robot::GOAL::MY_TEAM);
+      wait(2000, msec);
       break;
     case ACTION::PISTON_SHOOT:
       Robot::Actions::pistonShoot(Robot::GOAL::MY_TEAM);
+      wait(2000, msec);
       break;
     }
   if (intake)

@@ -51,7 +51,7 @@ double OdomTracking::findDeltaX(const double deltaTheta) {
   //          Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::BACK]));
   // wait(3, msec);
   // const float a = (encoderInches[Robot::Encoders::BACK] / deltaTheta)
-      /* + Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::BACK] */;
+  /* + Robot::Encoders::distanceToTrackingCenter[Robot::Encoders::BACK] */;
   // printf("radius:%f\n", a);
   return deltaTheta == 0
              ? encoderInches[Robot::Encoders::BACK]
@@ -334,6 +334,8 @@ void OdomTracking::reset(const Position pos) {
   data.curr.pos = pos;
   data.last.pos = pos;
   Inertial10.setHeading(Conversions::Radians::toDegrees(pos.heading), deg);
+  data.last.yaw = pos.heading;
+  data.curr.yaw = pos.heading;
 };
 
 OdomTracking::OdomTracking(Position startPos) : data(startPos) {

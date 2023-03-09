@@ -2,6 +2,7 @@
 #define ROBOT_H
 #include "position.h"
 #include "vex.h"
+#include "vex_motor.h"
 #include <atomic>
 #include <vector>
 
@@ -62,14 +63,16 @@ public:
     static motor_group *Right;
     static const void left(const float pct);
     static const void right(const float pct);
-  };
+    static void setStopping(vex::brakeType mode);
+    static void stop();
+  }; 
   enum class GOAL : int { MY_TEAM, RED, BLUE };
   enum class TEAM : bool { RED, BLUE } TEAM;
   static enum TEAM team;
   class Catapult {
   public:
     static const void retract();
-    static const void release();
+    static const void release(bool boost = false);
     // static const void AngleRelease();
   };
   class PistonBoost {
@@ -101,7 +104,8 @@ public:
     static const void goTo(const Position pos, const float marginOfError);
     /** @param marginOfError in inches */
     static const void goTo(const Coordinate coord, const float marginOfError);
-    static const void turnTo(const float heading);
+    /** @param marginOfError in radians */
+    static const void turnTo(const float heading, const float marginOfError = 0.1);
   };
   class InputListeners {
   public:

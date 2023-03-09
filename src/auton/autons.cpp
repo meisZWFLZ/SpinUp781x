@@ -1,10 +1,13 @@
 #include "auton/autons.h"
+#include "./auton/path.h"
+#include "auton/elements.h"
 #include "auton/playback.h"
 #include "conversions.h"
+#include "coordinate.h"
 #include "robot.h"
+#include "stdio.h"
+#include "vex_units.h"
 #include <cmath>
-
-#include "./auton/path.h"
 
 namespace auton {
 
@@ -80,12 +83,15 @@ constexpr float inchesToDeg(float inches) {
 // drive some amount of inches
 void driveDistance(float pct, float inches) {
   driveStraight(pct);
-  const float goalDeg = inchesToDeg(inches);
-  LeftDriveR.setPosition(0, degrees);
-  RightDriveR.setPosition(0, degrees);
-  while ((LeftDriveR.position(degrees) + RightDriveR.position(degrees) / 2) <
-         goalDeg)
+  auto startPos = Robot::getPosition();
+  // const float goalDeg = inchesToDeg(inches);
+  // LeftDriveR.setPosition(0, degrees);
+  // RightDriveR.setPosition(0, degrees);
+  while (/* (LeftDriveR.position(degrees) + RightDriveR.position(degrees)) / 2 <
+         goalDeg */
+         Position::distance(startPos, Robot::getPosition()) < inches)
     wait(40, msec);
+  driveStraight(0);
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -125,22 +131,24 @@ void leftAuton3In() {
   driveForStop(-0.3, 400);
 }
 void leftAuton2Roller() {
-  driveFor(0.4,200);
+  Robot::setPosition({0, 0, Conversions::Degrees::toRadians(90)});
+
+  driveFor(0.4, 200);
   Robot::Actions::roller();
-  wait(200,msec);
-  driveFor(0.0,0);
-  driveForStop(-0.4,400);
+  wait(200, msec);
+  driveFor(0.0, 0);
+  driveForStop(-0.4, 400);
   turning2(237);
-  Robot::Actions::pistonShoot(Robot::GOAL::MY_TEAM); 
-  wait(1000,msec);
+  Robot::Actions::pistonShoot(Robot::GOAL::MY_TEAM);
+  wait(1000, msec);
   turning2(297);
   Robot::Actions::intake();
-  driveForStop(0.6,700);
+  driveForStop(0.6, 700);
   Robot::Actions::intake();
-  wait(1500,msec);
+  wait(1500, msec);
   Robot::Actions::stopIntake();
   turning2(208);
-Robot::Actions::pistonShoot(Robot::GOAL::MY_TEAM);
+  Robot::Actions::pistonShoot(Robot::GOAL::MY_TEAM);
 }
 void leftAuton3Low() {
   leftAuton3In();
@@ -182,8 +190,89 @@ void leftAuton6() {
 
 // non-roller side
 void rightAutonRoller() {
-  static Player *player = new Player("b.txt");
-  player->start();
+  Robot::setPosition({84, 18 - (16.25 / 2), 0});
+
+  Robot::Actions::intake();
+  driveDistance(.3, 20);
+
+  printf("heading: %f\n", Robot::getPosition().heading);
+  // driveFor(-0.3, 500);
+  // driveFor(0.3, 500);
+
+  // Robot::Actions::turnTo(Conversions::Degrees::toRadians(55));
+  // driveDistance(.4, 2.5);
+  Robot::Actions::stopIntake();
+
+  const NormalPosition vector =
+      NormalPosition::difference(elements::GOAL::RED, Robot::getPosition());
+  const float target1 = atan2(vector.x, vector.y);
+  const float target = target1 < 0 ? target1 + pi2 : target1;
+
+  printf("target: %f\n", target);
+  printf("target1: %f\n", target1);
+  printf("heading: %f\n", Robot::getPosition().heading);
+
+  // turning2(20);
+  Robot::Actions::turnTo(target /* Conversions::Degrees::toRadians(13) */, 0.05);
+  
+  wait(250, msec);
+  // shoot
+  // Robot::Actions::pistonShoot(Robot::GOAL::RED);
+
+  wait(500, msec);
+  // Robot::Actions::turnTo(Conversions::Degrees::toRadians(270 /*deg*/));
+  // driveDistance(0.5, 1);
+
+  printf("heading: %f\n",
+         Conversions::Radians::toDegrees(Robot::getPosition().heading));
+
+  Robot::Actions::turnTo(Conversions::Degrees::toRadians(0));
+
+  wait(800, msec);
+
+  // 2nd volley
+  // 2nd disc
+
+  Robot::Actions::intake();
+  driveDistance(0.3,8.4);
+  // wait(400, msec);
+  // Robot::Drivetrain::setStopping(hold);
+
+  // Robot::Drivetrain::stop();
+  // Robot::Drivetrain::setStopping(coast);
+
+  Robot::Drivetrain::left(-0.5);
+  Robot::Drivetrain::right(-0.5);
+  wait(400, msec);
+  driveStraight(0);
+  // Robot::Drivetrain::stop();
+  // wait(100, msec);
+
+  // next 2 discs
+
+  return;
+
+  Robot::Actions::goTo({110, 12}, 0.75);
+  Robot::Actions::stopIntake();
+  Robot::Actions::turnTo(Conversions::Degrees::toRadians(180 /*deg*/));
+
+  driveStraight(0.3);
+
+  Coordinate lastPos = Robot::getPosition();
+  wait(500, msec);
+  while (Coordinate::distance(lastPos, Robot::getPosition()) > 0.2) {
+    lastPos = Robot::getPosition();
+    wait(100, msec);
+  }
+
+  driveStraight(0);
+  Robot::Drivetrain::left(0.1);
+
+  Robot::Actions::roller();
+  Robot::Drivetrain::left(0);
+
+  // static Player *player = new Player("b.txt");
+  // player->start();
   // static constexpr float distance1 = 11.24 / 3;           // 17.27 inches
   // static constexpr float distance2 = 9.5 / (2.75 * M_PI); // 6 inches
 
@@ -307,15 +396,15 @@ CallbackAuton::CallbackAuton(const char *name, void (*callback)(void))
 void CallbackAuton::execute() const { callback(); }
 
 void doNothing() { Brain.Screen.print("i should be doing nothing"); }
-const std::vector<const Auton*> autons = {
-    new auton::Path("AutoGUI/brandonerd.vauto", "right roll gui"),
-    new CallbackAuton("Left Roller", leftAutonRoller),
-    new CallbackAuton("Left R 3Low", leftAuton3Low),
-    new CallbackAuton("Left 2R 3In", leftAuton2Roller),
-    new CallbackAuton("Left R 3Low 3In", leftAuton3Low3In),
-    new CallbackAuton("Left R 6Low", leftAuton6),
+const std::vector<const Auton *> autons = {
     new CallbackAuton("Right Roller", rightAutonRoller),
-    new CallbackAuton("Right R 3Low", rightAutonDiscs),
+    // new auton::Path("AutoGUI/brandonerd.vauto", "right roll gui"),
+    new CallbackAuton("Left 2R 3In", leftAuton2Roller),
+    // new CallbackAuton("Left Roller", leftAutonRoller),
+    // new CallbackAuton("Left R 3Low", leftAuton3Low),
+    // new CallbackAuton("Left R 3Low 3In", leftAuton3Low3In),
+    // new CallbackAuton("Left R 6Low", leftAuton6),
+    // new CallbackAuton("Right R 3Low", rightAutonDiscs),
     new CallbackAuton("Do Nothing", doNothing),
     new CallbackAuton("Skills", skillsAuton),
 };

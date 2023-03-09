@@ -1,6 +1,7 @@
 #include "auton/action.h"
 #include "conversions.h"
 #include "coordinate.h"
+#include "math.h"
 #include "v5_color.h"
 #include <cmath>
 
@@ -19,12 +20,17 @@ inline constexpr float headingDifference(float a, float b) {
                         : diff < -M_PI ? 1
                                        : 0));
 }
+inline float headingDifference2(float a, float b) {
+  const float diff = headingDifference(a, b);
+  return std::min<float>(diff, diff + M_PI * (diff < M_PI ? 1 : -1));
+}
 const void Robot::Actions::goTo(const Coordinate targetCoord,
                                 const float marginOfError) {
-  static const float pidLimit = .5;
+  static const float pidLimit = 1;
   Position robotPos = Robot::getPosition();
   float distance = Position::distance(targetCoord, Robot::getPosition());
-  float headingDiff = 0;
+  float headingDiffForTurn = 0;
+  float headingDiffForStop = 0;
   float lastDistance = Position::distance(targetCoord, Robot::getPosition());
   while (distance > marginOfError) {
     // if (Controller1.ButtonA.pressing())
@@ -35,13 +41,16 @@ const void Robot::Actions::goTo(const Coordinate targetCoord,
     const float target1 = atan2(vector.x, vector.y);
     const float target = target1 < 0 ? target1 + pi2 : target1;
     const float heading1 = robotPos.heading;
-    headingDiff = headingDifference(target, heading1) /*  * 100 */;
+    headingDiffForTurn = headingDifference2(target, heading1) /*  * 100 */;
+    headingDiffForStop = headingDifference(target, heading1) /*  * 100 */;
 
     printf("{heading: %f\n+diff: %f\n@target: %f\n", heading1,
-           headingDiff /*  / 100 */, target);
+           headingDiffForTurn /*  / 100 */, target);
     const float stopAdjust = /* 0; */
-        pow(cos(headingDiff), 21) * 30 * distance / (2 + std::abs(distance));
-    const float turnAdjust = (25 * headingDiff / (0.3 + std::abs(headingDiff)));
+        pow(cos(headingDiffForStop), 21) * 30 * distance /
+        (2 + std::abs(distance));
+    const float turnAdjust =
+        (25 * headingDiffForTurn / (0.3 + std::abs(headingDiffForTurn)));
 
     const float leftAdjustment = (stopAdjust + turnAdjust) / 100;
     const float rightAdjustment = (stopAdjust - turnAdjust) / 100;
@@ -84,33 +93,49 @@ const void Robot::Actions::goTo(const Coordinate targetCoord,
     distance = Position::distance(targetCoord, robotPos);
   }
 }
-const void Robot::Actions::turnTo(const float heading) {
-  static const float pidLimit = .5;
-  Position robotPos = Robot::getPosition();
+const void Robot::Actions::turnTo(const float targetHeading,
+                                  const float marginOfError) {
+  static const float pidLimit = 0.5;
+  // Position robotPos = Robot::getPosition();
   float headingDiff = 0;
 
-  headingDiff = headingDifference(heading, robotPos.heading);
-  while (std::abs(headingDiff) > 0.2) {
+  float robotHeading = Conversions::Degrees::toRadians(Inertial10.heading(deg));
+  headingDiff = headingDifference(targetHeading, robotHeading);
+  float lastHeadingDiff = 0;
+  float derivative = 0;
+  while (std::abs(headingDiff) > marginOfError) {
+
+    robotHeading = Conversions::Degrees::toRadians(Inertial10.heading(deg));
+    lastHeadingDiff = headingDiff;
+    headingDiff = headingDifference(targetHeading, robotHeading);
+
+    derivative = headingDiff - lastHeadingDiff;
     // if (Controller1.ButtonA.pressing())
     //   break;
 
-    const float target = heading;
-    const float heading1 = robotPos.heading;
+    // const float target = heading;
 
-    // printf("{heading: %f\n+diff: %f\n@target: %f\n", heading1,
-    //        headingDiff /*  / 100 */, target);
+    printf("heading:\n  robot: %fdeg\n  diff: %fdeg\n  target: %fdeg\n  "
+           "deriative: %f\n",
+           Conversions::Radians::toDegrees(robotHeading),
+           Conversions::Radians::toDegrees(headingDiff) /*  / 100 */,
+           Conversions::Radians::toDegrees(targetHeading), derivative);
     // pow(cos(headingDiff), 5) * 40 * distance / (2 + abs(distance));
-    const float turnAdjust = (25 * headingDiff / (0.3 + std::abs(headingDiff)));
+
+    const float turnAdjust =
+        (10 * headingDiff / (0.5 + std::abs(headingDiff))) + derivative * 110;
 
     const float leftAdjustment = +turnAdjust /* / 100 */;
     // const float rightAdjustment = -turnAdjust / 100;
 
     const float limitedAdjustment =
         std::max(std::min(leftAdjustment, pidLimit), -pidLimit);
+    printf("  adjustment: %f\n", limitedAdjustment);
+
     Robot::Drivetrain::left(limitedAdjustment);
     Robot::Drivetrain::right(-limitedAdjustment);
 
-    // printf("(%f,%f,%f)", robotPos.x, robotPos.y, robotPos.heading);
+    // printf("(%f,%f,%f)", robotPos.x, robotPos.y, robotHeading);
 
     // if (std::abs(leftAdjustment) < pidLimit) {
     //   Robot::Drivetrain::left(leftAdjustment);
@@ -130,17 +155,18 @@ const void Robot::Actions::turnTo(const float heading) {
     // Controller1.Screen.print(",");
     // Controller1.Screen.print(robotPos.y);
     // Controller1.Screen.print(",");
-    // Controller1.Screen.print(robotPos.heading);
+    // Controller1.Screen.print(robotHeading);
     // Controller1.Screen.print(")");
     // Controller1.Screen.newLine();
 
     wait(20, msec);
 
-    robotPos = Robot::getPosition();
-    headingDiff = headingDifference(target, heading1) /*  * 100 */;
+    // headingDiff = headingDifference(target, robotHeading) /*  * 100 */;
 
     // distance = Position::distance(pos, robotPos);
   }
+  Robot::Drivetrain::left(0);
+  Robot::Drivetrain::right(0);
 }
 const void Robot::Actions::goTo(const Position pos, const float marginOfError) {
   // static const float pidLimit = .5;

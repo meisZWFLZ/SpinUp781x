@@ -7,7 +7,7 @@ namespace auton {
 struct Position : public NormalPosition {
 public:
   float marginOfError;
-  Position(double x, double y, double heading, float marginOfError);
+  Position(double x, double y, double , float marginOfError);
 };
 enum class ACTION : int {
   SHOOT,

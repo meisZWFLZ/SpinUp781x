@@ -332,7 +332,6 @@ int main() {
     wait(20, msec);
 
   OdomTracking tracker1 = {{}};
-  Inertial10.setHeading(90, deg);
 
   printf("deg:%f\n", Inertial10.heading(deg));
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~

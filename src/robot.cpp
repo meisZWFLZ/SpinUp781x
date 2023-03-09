@@ -2,6 +2,7 @@
 #include "coordinate.h"
 #include "vex.h"
 #include "vex_rotation.h"
+#include "vex_units.h"
 
 // enum Robot::PTO_STATE Robot::PTOState = {Robot::PTO_STATE::INTAKE};
 enum Robot::TEAM Robot::team = Robot::TEAM::RED;
@@ -85,7 +86,7 @@ const std::vector<double> Robot::Encoders::distanceToTrackingCenter = {Sl, Sr,
 void Robot::PistonBoost::boost() { PistonBooster.set(true); }
 void Robot::PistonBoost::unBoost() { PistonBooster.set(false); }
 
-const void Robot::Catapult::release() {
+const void Robot::Catapult::release(bool boost) {
   Intake.spin(reverse, 12, volt);
   // Robot::DiscLock::unlock();
   // Catapult1.spinFor(reverse, , deg);
@@ -94,6 +95,8 @@ const void Robot::Catapult::release() {
     // printf("release 1, limit:%ld\n", CatapultLimitSwitch.pressing());
     wait(5, msec);
   }
+  if (boost)
+    Robot::PistonBoost::boost();
   while (CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
     // printf("release 2, limit:%ld\n", CatapultLimitSwitch.pressing());
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
@@ -131,6 +134,7 @@ const void Robot::Actions::shoot(const enum Robot::GOAL goal) {
     Robot::Actions::stopIntake();
     thread([]() {
       Robot::Catapult::release();
+      wait(1000, msec);
       Robot::Catapult::retract();
       shooting = false;
     });
@@ -143,8 +147,8 @@ const void Robot::Actions::pistonShoot(const enum Robot::GOAL goal) {
     shooting = true;
     Robot::Actions::stopIntake();
     thread([]() {
-      Robot::PistonBoost::boost();
-      Robot::Catapult::release();
+      Robot::Catapult::release(true);
+      wait(1000, msec);
       Robot::Catapult::retract();
       shooting = false;
     });
@@ -166,11 +170,14 @@ const void Robot::Actions::pistonShoot(const enum Robot::GOAL goal) {
 //   });
 // };
 void Robot::Actions::intake() {
-  if (getFailSafe() || (CatapultLimitSwitch.pressing() && !shooting))
+  if (/* getFailSafe() ||  */ !shooting)
     Intake.spin(fwd, 12, volt);
 };
 const void Robot::Actions::outtake() { Intake.spin(reverse, 12, volt); };
-void Robot::Actions::stopIntake() { Intake.stop(); };
+void Robot::Actions::stopIntake() {
+  if (!shooting)
+    Intake.stop();
+};
 
 const void Robot::Actions::expand() {
   ExpansionPiston.set(true);
@@ -207,6 +214,15 @@ const void Robot::Drivetrain::right(const float pct) {
   // for (auto i = motors.begin(); i != motors.end(); ++i)
   //   i->spin(fwd, pct, percent);
 };
+
+void Robot::Drivetrain::stop() {
+  Robot::Drivetrain::Left->stop();
+  Robot::Drivetrain::Right->stop();
+}
+void Robot::Drivetrain::setStopping(brakeType mode) {
+  Robot::Drivetrain::Left->setStopping(mode);
+  Robot::Drivetrain::Right->setStopping(mode);
+}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Vision Sensor Roller Start
@@ -276,6 +292,9 @@ enum ROLLER whatIsRoller() {
 
 void visionAidedRoller() {
   Intake.stop();
+  if (shooting)
+    return;
+
   // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
   spinningRoller = true;
   if (RollerSensor.installed()) {
@@ -338,8 +357,8 @@ void Robot::InputListeners::outtake() {
     Robot::Actions::outtake();
 };
 void Robot::InputListeners::expand() {
-  if (!getFailSafe())
-    Robot::Catapult::release();
+  // if (!getFailSafe())
+  Robot::Catapult::release();
   Robot::Actions::expand();
 };
 
