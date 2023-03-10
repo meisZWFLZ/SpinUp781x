@@ -25,8 +25,9 @@ inline float headingDifference2(float a, float b) {
   return std::min<float>(diff, diff + M_PI * (diff < M_PI ? 1 : -1));
 }
 const void Robot::Actions::goTo(const Coordinate targetCoord,
-                                const float marginOfError) {
-  static const float pidLimit = 1;
+                                const float marginOfError, const float maxsped,
+                                const float someVal) {
+  const float pidLimit = maxsped;
   Position robotPos = Robot::getPosition();
   float distance = Position::distance(targetCoord, Robot::getPosition());
   float headingDiffForTurn = 0;
@@ -47,7 +48,7 @@ const void Robot::Actions::goTo(const Coordinate targetCoord,
     printf("{heading: %f\n+diff: %f\n@target: %f\n", heading1,
            headingDiffForTurn /*  / 100 */, target);
     const float stopAdjust = /* 0; */
-        pow(cos(headingDiffForStop), 21) * 30 * distance /
+        pow(cos(headingDiffForStop), 21) * someVal * distance /
         (2 + std::abs(distance));
     const float turnAdjust =
         (25 * headingDiffForTurn / (0.3 + std::abs(headingDiffForTurn)));
@@ -168,14 +169,15 @@ const void Robot::Actions::turnTo(const float targetHeading,
   Robot::Drivetrain::left(0);
   Robot::Drivetrain::right(0);
 }
-const void Robot::Actions::goTo(const Position pos, const float marginOfError) {
+const void Robot::Actions::goTo(const Position pos, const float marginOfError,
+                                const float maxsped) {
   // static const float pidLimit = .5;
   // Position robotPos = Robot::getPosition();
   // float distance = Position::distance(pos, Robot::getPosition());
   // float headingDiff = 0;
   // float lastDistance = Position::distance(pos, Robot::getPosition());
 
-  Robot::Actions::goTo({pos.x, pos.y}, marginOfError);
+  Robot::Actions::goTo({pos.x, pos.y}, marginOfError, maxsped);
   Robot::Actions::turnTo(pos.heading);
 
   // return;

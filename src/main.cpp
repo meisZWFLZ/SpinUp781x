@@ -84,7 +84,7 @@ void controllerDisplay();
 
 void driverControl() {
   thread([] { controllerDisplay(); });
-  Robot::setPosition({72, 72, Conversions::Degrees::toRadians(90)});
+  // Robot::setPosition({72, 72, Conversions::Degrees::toRadians(90)});
   // Inertial10.setHeading(90, deg);
   // drivetrain
   // Controller1.Axis2.changed(&rightDriveSubscriber);
@@ -332,6 +332,8 @@ int main() {
     wait(20, msec);
 
   OdomTracking tracker1 = {{}};
+
+  // Robot::setPosition({12, 102, 270});
 
   printf("deg:%f\n", Inertial10.heading(deg));
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~

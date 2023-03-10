@@ -65,7 +65,7 @@ public:
     static const void right(const float pct);
     static void setStopping(vex::brakeType mode);
     static void stop();
-  }; 
+  };
   enum class GOAL : int { MY_TEAM, RED, BLUE };
   enum class TEAM : bool { RED, BLUE } TEAM;
   static enum TEAM team;
@@ -101,11 +101,14 @@ public:
     static void roller();
     static const void expand();
     /** @param marginOfError in inches */
-    static const void goTo(const Position pos, const float marginOfError);
+    static const void goTo(const Position pos, const float marginOfError,
+                           const float maxsped = 0.5);
     /** @param marginOfError in inches */
-    static const void goTo(const Coordinate coord, const float marginOfError);
+    static const void goTo(const Coordinate coord, const float marginOfError,
+                           const float maxsped = 0.5, const float someVal = 30);
     /** @param marginOfError in radians */
-    static const void turnTo(const float heading, const float marginOfError = 0.1);
+    static const void turnTo(const float heading,
+                             const float marginOfError = 0.1);
   };
   class InputListeners {
   public:

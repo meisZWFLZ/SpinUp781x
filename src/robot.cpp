@@ -3,6 +3,7 @@
 #include "vex.h"
 #include "vex_rotation.h"
 #include "vex_units.h"
+#include <cmath>
 
 // enum Robot::PTO_STATE Robot::PTOState = {Robot::PTO_STATE::INTAKE};
 enum Robot::TEAM Robot::team = Robot::TEAM::RED;
@@ -90,13 +91,22 @@ const void Robot::Catapult::release(bool boost) {
   Intake.spin(reverse, 12, volt);
   // Robot::DiscLock::unlock();
   // Catapult1.spinFor(reverse, , deg);
+  const auto startTime = vex::timer::system();
+  while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing() &&
+         boost && (vex::timer::system() - startTime) < 125) {
+    // printf("limit: %ld", CatapultLimitSwitch.pressing());
+    // printf("release 1, limit:%ld\n", CatapultLimitSwitch.pressing());
+    wait(5, msec);
+  }
+  Brain.Screen.setCursor(2, 0);
+  Brain.Screen.print("boost cata");
+  if (boost)
+    Robot::PistonBoost::boost();
   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
     // printf("release 1, limit:%ld\n", CatapultLimitSwitch.pressing());
     wait(5, msec);
   }
-  if (boost)
-    Robot::PistonBoost::boost();
   while (CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
     // printf("release 2, limit:%ld\n", CatapultLimitSwitch.pressing());
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
@@ -110,15 +120,18 @@ const void Robot::Catapult::retract() {
   Intake.spin(reverse, 12, volt);
   // Catapult1.spin(reverse, 100, pct);
 
-  const auto startTime = vex::timer::system();
-  while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing() &&
-         (vex::timer::system() - startTime) < 300) {
-    // printf("retract, limit:%ld\n", CatapultLimitSwitch.pressing());
-    // printf("limit: %ld", CatapultLimitSwitch.pressing());
-    // printf("retract\n", CatapultLimitSwitch.pressing());
-    wait(5, msec);
-  }
+  // const auto startTime = vex::timer::system();
+  // // wait(150, msec);
+  // while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()
+  // &&
+  //        (vex::timer::system() - startTime) < 50) {
+  //   // printf("retract, limit:%ld\n", CatapultLimitSwitch.pressing());
+  //   // printf("limit: %ld", CatapultLimitSwitch.pressing());
+  //   // printf("retract\n", CatapultLimitSwitch.pressing());
+  //   wait(5, msec);
+  // }
   Robot::PistonBoost::unBoost();
+  Brain.Screen.print("unboost cata");
   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing()) {
     wait(5, msec);
   }
@@ -134,7 +147,7 @@ const void Robot::Actions::shoot(const enum Robot::GOAL goal) {
     Robot::Actions::stopIntake();
     thread([]() {
       Robot::Catapult::release();
-      wait(1000, msec);
+      wait(200, msec);
       Robot::Catapult::retract();
       shooting = false;
     });
@@ -144,13 +157,26 @@ const void Robot::Actions::shoot(const enum Robot::GOAL goal) {
 
 const void Robot::Actions::pistonShoot(const enum Robot::GOAL goal) {
   if (!shooting && !Controller1.ButtonY.pressing()) {
-    shooting = true;
     Robot::Actions::stopIntake();
+    shooting = true;
     thread([]() {
+      // Robot::Catapult::retract();
+      // wait(200, msec);
+      // Intake.spin(fwd, -12, volt);
+      // wait(50, msec);
+      // Intake.stop();
+      // Robot::Catapult::retract();
+      // Robot::PistonBoost::boost();
+      printf("^^release\n");
       Robot::Catapult::release(true);
-      wait(1000, msec);
+      wait(100, msec);
+      Robot::PistonBoost::unBoost();
+      wait(100, msec);
+      // wait(1000, msec);
+      printf("^^retract\n");
       Robot::Catapult::retract();
       shooting = false;
+      printf("^^done\n");
     });
   }
 };
@@ -170,13 +196,18 @@ const void Robot::Actions::pistonShoot(const enum Robot::GOAL goal) {
 //   });
 // };
 void Robot::Actions::intake() {
+  printf("***shooting:%d\n", shooting);
   if (/* getFailSafe() ||  */ !shooting)
     Intake.spin(fwd, 12, volt);
 };
 const void Robot::Actions::outtake() { Intake.spin(reverse, 12, volt); };
 void Robot::Actions::stopIntake() {
-  if (!shooting)
+  if (!shooting) {
+    // while ((int(std::abs(Intake.position(deg))) % 150) > 0.5) {
+    //   wait(10, msec);
+    // }
     Intake.stop();
+  }
 };
 
 const void Robot::Actions::expand() {
@@ -291,7 +322,7 @@ enum ROLLER whatIsRoller() {
 };
 
 void visionAidedRoller() {
-  Intake.stop();
+  Robot::Actions::stopIntake();
   if (shooting)
     return;
 
