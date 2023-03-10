@@ -236,7 +236,12 @@ void rightAutonRoller() {
   // driveDistance(.4, 2.5);
   turnTowardsRedGoal();
   // shoot
+  driveFor(-0.5, 500);
+  driveStraight(0.6);
+  wait(200, msec);
   Robot::Actions::pistonShoot(Robot::GOAL::RED);
+  wait(100, msec);
+  Robot::Drivetrain::stop();
 
   wait(500, msec);
   // Robot::Actions::turnTo(Conversions::Degrees::toRadians(270 /*deg*/));
@@ -375,11 +380,18 @@ void awp() {
   Robot::Actions::pistonShoot(Robot::GOAL::RED);
   wait(100, msec);
   Robot::Drivetrain::stop();
-  wait(1150, msec);
+  wait(1000, msec);
+
+  // let catq retract, then start intake
+  thread([] {
+    auto startTime = vex::timer::system();
+    while (vex::timer::system() - startTime < 400 && !Intake.isSpinning()) {
+      Robot::Actions::intake();
+      wait(10, msec);
+    }
+  });
 
   // go to right roller
-
-    Robot::Actions::intake();
   Robot::Actions::goTo({116, 12}, 1.5, 1, 50);
   Robot::Actions::stopIntake();
 
