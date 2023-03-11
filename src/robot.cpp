@@ -1,5 +1,6 @@
 #include "robot.h"
 #include "coordinate.h"
+#include "stdio.h"
 #include "vex.h"
 #include "vex_rotation.h"
 #include "vex_units.h"
@@ -320,15 +321,37 @@ enum ROLLER whatIsRoller() {
              ? ROLLER::BLUE
              : (hue1 > 220 && hue1 < 275 ? ROLLER::RED : ROLLER::IN_BETWEEN);
 };
+bool amSeeRoller() {
+  // // rollArea.update();
+  // // if (rollArea.red > 200 && rollArea.blue > 200 &&
+  // //     rollArea.redC.y < rollArea.blueC.y)
+  // //   return ROLLER::RED;
+  // // if (rollArea.red > 200 && rollArea.blue > 200 &&
+  // //     rollArea.redC.y > rollArea.blueC.y)
+  // //   return ROLLER::BLUE;
+  // // return ROLLER::IN_BETWEEN;
+  // auto hue1 = RollerSensor.hue();
+  // // printf("hue: %f,\nroller: %s\n", RollerSensor.hue(),
+  // //        hue1 > 325 || hue1 < 10
+  // //            ? "blue"
+  // //            : (hue1 > 220 && hue1 < 275 ? "red" : "in_between"));
+  // return hue1 > 325 || hue1 < 20
+  //            ? ROLLER::BLUE
+  //            : (hue1 > 220 && hue1 < 275 ? ROLLER::RED : ROLLER::IN_BETWEEN);
+  // return ;
+  // printf("rgb: %lu", RollerSensor.color().rgb());
+  return RollerSensor.isNearObject() && whatIsRoller() == ROLLER::IN_BETWEEN;
+};
 
 void visionAidedRoller() {
-  Robot::Actions::stopIntake();
+  // printf("rgb: %lu\n", RollerSensor.color().rgb());
+  // return Robot::Actions::stopIntake();
   if (shooting)
     return;
 
   // Robot::Actions::pto(Robot::PTO_STATE::INTAKE);
   spinningRoller = true;
-  if (RollerSensor.installed()) {
+  if (RollerSensor.installed() && amSeeRoller()) {
     const auto startTime = vex::timer::system();
     // Intake.spin(fwd, 25, pct);
     Intake.spin(fwd, 100, pct);

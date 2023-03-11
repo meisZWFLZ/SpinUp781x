@@ -8,7 +8,9 @@
 #include "odom/tracking.h"
 #include "pid_controller.h"
 #include "position.h"
+#include "stdlib.h"
 #include "vex.h"
+#include "vex_global.h"
 #include "vex_imu.h"
 #include <atomic>
 #include <cmath>
@@ -345,9 +347,14 @@ int main() {
   preAuton();
 
   // thread give_me_a_name([] { controllerDisplay(); });
-
+  // std::string rumble = "";
+  // for (int i = 0; i < 500; i++) {
+  //   rumble += rand() > RAND_MAX / 2 ? "." : "-";
+  // }
+  // Controller1.rumble(rumble.c_str());
   while (1) {
-    wait(1000, msec);
+    wait(rand() / (RAND_MAX / 120000), msec);
+    Controller1.rumble(rand() > RAND_MAX / 2 ? "." : "-");
   }
   return 1;
 
@@ -384,7 +391,10 @@ void controllerDisplay() {
     //       << std::string(" F");
     Controller1.Screen.clearLine();
     Controller1.Screen.print("cata/in: ");
-    Controller1.Screen.print(Intake./*power(watt) */ temperature(fahrenheit));
+    Controller1.Screen.print(
+        (IntakeMotorA./*power(watt) */ temperature(fahrenheit) +
+         IntakeMotorB.temperature(fahrenheit)) /
+        2);
     Controller1.Screen.print(" F");
     Controller1.Screen.newLine();
 

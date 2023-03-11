@@ -187,13 +187,16 @@ void leftAuton6() {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //          Right Side
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void driveForwardUntilStopped(float speed, float allowedDistance) {
+void driveForwardUntilStopped(float speed, float allowedDistance,
+                              float maxTime = 350) {
   driveStraight(speed);
 
   Coordinate lastPos = Robot::getPosition();
+  auto startTime = vex::timer::system();
   wait(500, msec);
   while (Coordinate::distance(lastPos, Robot::getPosition()) >
-         allowedDistance) {
+             allowedDistance &&
+         vex::timer::system() - startTime < maxTime) {
     lastPos = Robot::getPosition();
     wait(100, msec);
   }
@@ -201,7 +204,8 @@ void driveForwardUntilStopped(float speed, float allowedDistance) {
   driveStraight(0);
 };
 
-void turnTowardsRedGoal() {
+void turnTowardsRedGoal(const float allowedDifference = 0.05,
+                        const float addToTarget = 0) {
   Robot::Actions::stopIntake();
 
   const NormalPosition vector =
@@ -214,15 +218,19 @@ void turnTowardsRedGoal() {
   printf("heading: %f\n", Robot::getPosition().heading);
 
   // turning2(20);
-  Robot::Actions::turnTo(target /* Conversions::Degrees::toRadians(13) */,
-                         0.05);
+  Robot::Actions::turnTo(
+      target + addToTarget /* Conversions::Degrees::toRadians(13) */,
+      allowedDifference);
 
   Robot::Drivetrain::stop();
 
   wait(250, msec);
 }
-// non-roller side
-void rightAutonRoller() {
+
+/**
+ * !! intake continues to spins after function !!
+ * */
+void right3Discs() {
   Robot::setPosition({84, 18 - (16.25 / 2), 0});
 
   Robot::Actions::intake();
@@ -234,14 +242,18 @@ void rightAutonRoller() {
 
   // Robot::Actions::turnTo(Conversions::Degrees::toRadians(55));
   // driveDistance(.4, 2.5);
-  turnTowardsRedGoal();
+  turnTowardsRedGoal(Conversions::Degrees::toRadians(1 /*deg*/));
   // shoot
-  driveFor(-0.5, 500);
+  driveFor(-0.5, 550);
   driveStraight(0.6);
   wait(200, msec);
   Robot::Actions::pistonShoot(Robot::GOAL::RED);
   wait(100, msec);
   Robot::Drivetrain::stop();
+}
+// non-roller side
+void rightAutonRoller() {
+  right3Discs();
 
   wait(500, msec);
   // Robot::Actions::turnTo(Conversions::Degrees::toRadians(270 /*deg*/));
@@ -250,7 +262,7 @@ void rightAutonRoller() {
   printf("heading: %f\n",
          Conversions::Radians::toDegrees(Robot::getPosition().heading));
 
-  Robot::Actions::turnTo(Conversions::Degrees::toRadians(0));
+  // Robot::Actions::turnTo(Conversions::Degrees::toRadians(0));
 
   wait(800, msec);
 
@@ -282,13 +294,13 @@ void rightAutonRoller() {
 
   // roller
   // go near to roller
-  Robot::Actions::goTo({108, 12}, 1);
+  Robot::Actions::goTo({111, 12}, 1.2);
   Robot::Actions::stopIntake();
 
   // face into roller
   Robot::Actions::turnTo(Conversions::Degrees::toRadians(180 /*deg*/));
   // drive into roller
-  driveForwardUntilStopped(0.3, 0.2);
+  driveForwardUntilStopped(0.3, 0.2, 750);
 
   // apply pressure
   Robot::Drivetrain::left(0.1);
@@ -319,6 +331,38 @@ void rightAutonRoller() {
   // driveStraight(-0.15);
   // Robot::Actions::roller();
   // driveStraight(0);
+}
+
+void right5Discs() {
+  right3Discs();
+  wait(700, msec);
+  Robot::Actions::turnTo(Conversions::Degrees::toRadians(360 - 45 /*deg*/),
+                         Conversions::Degrees::toRadians(30 /*deg*/));
+  Robot::Actions::goTo({48, 72}, 2);
+
+  turnTowardsRedGoal(Conversions::Degrees::toRadians(1 /*deg*/));
+  // shoot
+  driveFor(-0.5, 500);
+  driveStraight(0.6);
+  wait(200, msec);
+  Robot::Actions::pistonShoot(Robot::GOAL::RED);
+  wait(100, msec);
+  Robot::Drivetrain::stop();
+
+  // 3 stack
+  Robot::Actions::turnTo(Conversions::Degrees::toRadians(360 - 45 /*deg*/),
+                         Conversions::Degrees::toRadians(30 /*deg*/));
+  Robot::Actions::goTo({32, 88}, 2);
+
+  turnTowardsRedGoal(Conversions::Degrees::toRadians(1 /*deg*/));
+
+  // shoot
+  driveFor(-0.5, 500);
+  driveStraight(0.6);
+  wait(200, msec);
+  Robot::Actions::pistonShoot(Robot::GOAL::RED);
+  wait(100, msec);
+  Robot::Drivetrain::stop();
 }
 void rightAutonDiscs() {
   rightAutonRoller();
@@ -363,44 +407,45 @@ void awp() {
   Robot::Actions::turnTo(Conversions::Degrees::toRadians(135 /*deg*/),
                          Conversions::Degrees::toRadians(30 /*deg*/));
 
-  // return;
-
   // intake 3 stack
   Robot::Actions::intake();
-  Robot::Actions::goTo({50, 70}, 1.75, 1, 50);
+  Robot::Actions::goTo({52, 68}, 1.75, 0.5, 35);
   // driveDistance(0.4, 4.24264068712 * 12);
   Robot::Drivetrain::stop();
-  Robot::Actions::stopIntake();
+
+  // return;
 
   // shoot
-  turnTowardsRedGoal();
+  turnTowardsRedGoal(Conversions::Degrees::toRadians(1 /*deg*/),
+                     Conversions::Degrees::toRadians(2.5 /*deg*/));
   driveForStop(-0.5, 400);
+  Robot::Actions::stopIntake();
   driveStraight(0.6);
   wait(200, msec);
   Robot::Actions::pistonShoot(Robot::GOAL::RED);
-  wait(100, msec);
+  wait(150, msec);
   Robot::Drivetrain::stop();
   wait(1000, msec);
 
-  // let catq retract, then start intake
+  // let cata retract, then start intake
   thread([] {
     auto startTime = vex::timer::system();
-    while (vex::timer::system() - startTime < 400 && !Intake.isSpinning()) {
+    while (vex::timer::system() - startTime < 2000 && Intake.voltage() < 1) {
       Robot::Actions::intake();
       wait(10, msec);
     }
   });
 
   // go to right roller
-  Robot::Actions::goTo({116, 12}, 1.5, 1, 50);
+  Robot::Actions::goTo({115, 12}, 1.5, 1, 50);
   Robot::Actions::stopIntake();
 
   // face roller
   Robot::Actions::turnTo(Conversions::Degrees::toRadians(180 /*deg*/),
                          Conversions::Degrees::toRadians(5 /*deg*/));
-
   // go into roller
   driveForwardUntilStopped(0.5, 0.2);
+
   Robot::Drivetrain::stop();
   // apply pressure
   Robot::Drivetrain::left(0.1);
@@ -416,11 +461,66 @@ void skillsAuton() {
   // static constexpr int pidLimit = 50;
   // static constexpr float target = Conversions::Degrees::toRadians(225);
 
-  leftAutonRoller();
-  driveForStop(0.3, 700);
-  turning2(225 - 180 - 10);
-  driveForStop(-0.3, 500);
+  awp();
+  // back out
+  driveForStop(-0.3, 400);
+
+  // go near roller
+  Robot::Actions::goTo({132, 36}, 1.5);
+  // face roller
+  Robot::Actions::turnTo(Conversions::Degrees::toRadians(90 /*deg*/),
+                         Conversions::Degrees::toRadians(5 /*deg*/));
+  wait(500, msec);
+  // drive into roller
+  driveForwardUntilStopped(0.3, 0.2);
+  // apply pressure
+  Robot::Drivetrain::right(0.1);
+  Robot::Actions::roller();
+
+  // back out of roller
+  driveForStop(-0.3, 400);
+
+  // go near red goal
+  Robot::Actions::goTo({132, 84}, 1.25);
+  // aim
+  turnTowardsRedGoal();
+  Robot::Actions::shoot(Robot::GOAL::RED);
+  wait(700, msec);
+
+  // face 1st disc
+  Robot::Actions::turnTo(Conversions::Degrees::toRadians(270 /*deg*/),
+                         Conversions::Degrees::toRadians(30 /*deg*/));
+  // intake first disc
+  Robot::Actions::intake();
+  Robot::Actions::goTo({96, 96}, 1.5);
+
+  // face next 2 discs
+  Robot::Actions::turnTo(Conversions::Degrees::toRadians(360 - 45 /*deg*/),
+                         Conversions::Degrees::toRadians(15 /*deg*/));
+  Robot::Actions::goTo({48, 120}, 1);
+
+  // go to roller
+  Robot::Actions::goTo({36, 132}, 1);
+
+  Robot::Actions::turnTo(Conversions::Degrees::toRadians(0 /*deg*/),
+                         Conversions::Degrees::toRadians(5 /*deg*/));
+  driveForwardUntilStopped(0.3, 0.2);
+  Robot::Actions::roller();
+  // prep for expand
+  Robot::Actions::goTo({120, 24}, 1.5);
+
+  // aim expansion
+  Robot::Actions::turnTo(Conversions::Degrees::toRadians(360 - 45 /*deg*/),
+                         Conversions::Degrees::toRadians(5 /*deg*/));
+  Robot::Drivetrain::stop();
+  wait(500, msec);
+
   Robot::Actions::expand();
+
+  // leftAutonRoller();
+  // driveForStop(0.3, 700);
+  // turning2(225 - 180 - 10);
+  // driveForStop(-0.3, 500);
 
   // float robotHeading;
   // float headingDiff = headingDifference(target, Inertial10.heading());
@@ -486,10 +586,11 @@ void CallbackAuton::execute() const { callback(); }
 
 void doNothing() { Brain.Screen.print("i should be doing nothing"); }
 const std::vector<const Auton *> autons = {
-    new CallbackAuton("AWP", awp),
     new CallbackAuton("Right Roller", rightAutonRoller),
+    new CallbackAuton("AWP", awp),
     // new auton::Path("AutoGUI/brandonerd.vauto", "right roll gui"),
-    new CallbackAuton("Left 2R 3In", leftAuton2Roller),
+    new CallbackAuton("neilton (nerd)", leftAuton2Roller),
+    new CallbackAuton("YO MOTHER", right5Discs),
     // new CallbackAuton("Left Roller", leftAutonRoller),
     // new CallbackAuton("Left R 3Low", leftAuton3Low),
     // new CallbackAuton("Left R 3Low 3In", leftAuton3Low3In),

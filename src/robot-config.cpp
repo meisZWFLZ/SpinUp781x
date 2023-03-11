@@ -1,4 +1,5 @@
 #include "vex.h"
+#include "vex_global.h"
 
 using namespace vex;
 using signature = vision::signature;
@@ -21,11 +22,11 @@ motor RightDriveC = motor(PORT19, ratio6_1, true);
 rotation LeftDriveR = rotation(PORT4, true);
 rotation HoriR = rotation(PORT5, false);
 rotation RightDriveR = rotation(PORT6, false);
-optical RollerSensor = optical(PORT8);
+optical RollerSensor = optical(PORT9);
 digital_out DiscLock1 = digital_out(Brain.ThreeWirePort.B);
 digital_out PistonBooster = digital_out(Brain.ThreeWirePort.E);
-motor IntakeMotorA = motor(PORT2, ratio18_1, false);
-motor IntakeMotorB = motor(PORT3, ratio18_1, true);
+motor IntakeMotorA = motor(PORT2, ratio36_1, false);
+motor IntakeMotorB = motor(PORT3, ratio36_1, true);
 motor_group Intake = motor_group(IntakeMotorA, IntakeMotorB);
 
 // VEXcode generated functions
