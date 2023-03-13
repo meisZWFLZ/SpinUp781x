@@ -3,6 +3,7 @@
 #include "stdio.h"
 #include "vex.h"
 #include "vex_rotation.h"
+#include "vex_thread.h"
 #include "vex_units.h"
 #include <cmath>
 
@@ -94,7 +95,7 @@ const void Robot::Catapult::release(bool boost) {
   // Catapult1.spinFor(reverse, , deg);
   const auto startTime = vex::timer::system();
   while (!CatapultLimitSwitch.pressing() && !Controller1.ButtonY.pressing() &&
-         boost && (vex::timer::system() - startTime) < 125) {
+         boost && (vex::timer::system() - startTime) < 200) {
     // printf("limit: %ld", CatapultLimitSwitch.pressing());
     // printf("release 1, limit:%ld\n", CatapultLimitSwitch.pressing());
     wait(5, msec);
@@ -215,6 +216,8 @@ const void Robot::Actions::expand() {
   ExpansionPiston.set(true);
   wait(500, msec);
   ExpansionPiston.set(false);
+
+  printf("expand!!\n");
 };
 // const void Robot::Actions::pto(const Robot::PTO_STATE state) {
 //   if (Robot::PTOState == state)
@@ -340,7 +343,8 @@ bool amSeeRoller() {
   //            : (hue1 > 220 && hue1 < 275 ? ROLLER::RED : ROLLER::IN_BETWEEN);
   // return ;
   // printf("rgb: %lu", RollerSensor.color().rgb());
-  return RollerSensor.isNearObject() && whatIsRoller() == ROLLER::IN_BETWEEN;
+  return RollerSensor
+      .isNearObject() /* && whatIsRoller() == ROLLER::IN_BETWEEN */;
 };
 
 void visionAidedRoller() {
@@ -412,8 +416,18 @@ void Robot::InputListeners::outtake() {
 };
 void Robot::InputListeners::expand() {
   // if (!getFailSafe())
+
+  // ensures expansion will fire even if chain breaks / intake motors cannot spin / limit switch cannot be pressed
+  thread([] {
+    wait(300, msec);
+    auto startTime = vex::timer::system();
+    while (shooting && startTime < 500)
+      wait(15, msec);
+    Robot::Actions::expand();
+  });
   Robot::Catapult::release();
-  Robot::Actions::expand();
+
+  // Robot::Actions::expand();
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
